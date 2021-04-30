@@ -1,0 +1,246 @@
+C:\root\home\development\UMSATS\FreeRTOS.Simulator.C++\bin\avionics.elf.exe
+Buzzer has been set up.
+Recovery GPIO pins have been set up.
+UMSATS ROCKETRY FLIGHT COMPUTER
+Flash ID read successful
+Memory Manager has been set
+Memory Manager has been configured
+Pressure sensor has been set up.
+IMU sensor has been set up.
+Flight controller has been set up.
+Memory Manager has been started.
+C++ DataFeeder has successfully started.
+System configurations have been extracted
+Memory configurations have been extracted
+Memory configurations have been updated
+Event Detector has been set & configured
+Flight State Machine has been set
+Flight Time: 1 sec
+Flight Time: 2 sec
+Flight Time: 3 sec
+FLIGHT_STATE_LAUNCHPAD: Detected Launch at 2.391113m
+Flight Time: 4 sec
+Flight Time: 5 sec
+Flight Time: 6 sec
+Flight Time: 7 sec
+Flight Time: 8 sec
+Flight Time: 9 sec
+Flight Time: 10 sec
+Flight Time: 11 sec
+Flight Time: 12 sec
+Flight Time: 13 sec
+Flight Time: 14 sec
+Flight Time: 15 sec
+Flight Time: 16 sec
+Flight Time: 17 sec
+Flight Time: 18 sec
+Flight Time: 19 sec
+Flight Time: 20 sec
+Flight Time: 21 sec
+Flight Time: 22 sec
+Flight Time: 23 sec
+Flight Time: 24 sec
+Flight Time: 25 sec
+Flight Time: 26 sec
+Flight Time: 27 sec
+Flight Time: 28 sec
+Flight Time: 29 sec
+Flight Time: 30 sec
+Flight Time: 31 sec
+Flight Time: 32 sec
+Flight Time: 33 sec
+FLIGHT_STATE_PRE_APOGEE: Detected APOGEE at 3905.826660m
+FLIGHT_STATE_APOGEE: Igniting recovery circuit drogue
+Flight Time: 34 sec
+Flight Time: 35 sec
+Flight Time: 36 sec
+Flight Time: 37 sec
+Flight Time: 38 sec
+Flight Time: 39 sec
+Flight Time: 40 sec
+Flight Time: 41 sec
+Flight Time: 42 sec
+Flight Time: 43 sec
+Flight Time: 44 sec
+Flight Time: 45 sec
+Flight Time: 46 sec
+Flight Time: 47 sec
+Flight Time: 48 sec
+Flight Time: 49 sec
+Flight Time: 50 sec
+Flight Time: 51 sec
+Flight Time: 52 sec
+Flight Time: 53 sec
+Flight Time: 54 sec
+Flight Time: 55 sec
+Flight Time: 56 sec
+Flight Time: 57 sec
+Flight Time: 58 sec
+Flight Time: 59 sec
+Flight Time: 60 sec
+Flight Time: 61 sec
+Flight Time: 62 sec
+Flight Time: 63 sec
+Flight Time: 64 sec
+Flight Time: 65 sec
+Flight Time: 66 sec
+Flight Time: 67 sec
+Flight Time: 68 sec
+Flight Time: 69 sec
+Flight Time: 70 sec
+Flight Time: 71 sec
+Flight Time: 72 sec
+Flight Time: 73 sec
+Flight Time: 74 sec
+Flight Time: 75 sec
+Flight Time: 76 sec
+Flight Time: 77 sec
+Flight Time: 78 sec
+Flight Time: 79 sec
+Flight Time: 80 sec
+Flight Time: 81 sec
+Flight Time: 82 sec
+Flight Time: 83 sec
+Flight Time: 84 sec
+Flight Time: 85 sec
+Flight Time: 86 sec
+Flight Time: 87 sec
+Flight Time: 88 sec
+Flight Time: 89 sec
+Flight Time: 90 sec
+Flight Time: 91 sec
+Flight Time: 92 sec
+Flight Time: 93 sec
+Flight Time: 94 sec
+Flight Time: 95 sec
+Flight Time: 96 sec
+Flight Time: 97 sec
+Flight Time: 98 sec
+Flight Time: 99 sec
+Flight Time: 100 sec
+Flight Time: 101 sec
+Flight Time: 102 sec
+Flight Time: 103 sec
+Flight Time: 104 sec
+Flight Time: 105 sec
+Flight Time: 106 sec
+Flight Time: 107 sec
+Flight Time: 108 sec
+Flight Time: 109 sec
+Flight Time: 110 sec
+Flight Time: 111 sec
+Flight Time: 112 sec
+Flight Time: 113 sec
+Flight Time: 114 sec
+Flight Time: 115 sec
+Flight Time: 116 sec
+Flight Time: 117 sec
+Flight Time: 118 sec
+Flight Time: 119 sec
+Flight Time: 120 sec
+Flight Time: 121 sec
+Flight Time: 122 sec
+Flight Time: 123 sec
+Flight Time: 124 sec
+Flight Time: 125 sec
+Flight Time: 126 sec
+Flight Time: 127 sec
+Flight Time: 128 sec
+Flight Time: 129 sec
+Flight Time: 130 sec
+Flight Time: 131 sec
+Flight Time: 132 sec
+Flight Time: 133 sec
+Flight Time: 134 sec
+Flight Time: 135 sec
+Flight Time: 136 sec
+Flight Time: 137 sec
+Flight Time: 138 sec
+Flight Time: 139 sec
+Flight Time: 140 sec
+Flight Time: 141 sec
+Flight Time: 142 sec
+Flight Time: 143 sec
+Flight Time: 144 sec
+Flight Time: 145 sec
+Flight Time: 146 sec
+Flight Time: 147 sec
+Flight Time: 148 sec
+Flight Time: 149 sec
+Flight Time: 150 sec
+Flight Time: 151 sec
+Flight Time: 152 sec
+Flight Time: 153 sec
+Flight Time: 154 sec
+Flight Time: 155 sec
+Flight Time: 156 sec
+Flight Time: 157 sec
+Flight Time: 158 sec
+Flight Time: 159 sec
+Flight Time: 160 sec
+Flight Time: 161 sec
+Flight Time: 162 sec
+Flight Time: 163 sec
+Flight Time: 164 sec
+Flight Time: 165 sec
+Flight Time: 166 sec
+Flight Time: 167 sec
+Flight Time: 168 sec
+Flight Time: 169 sec
+Flight Time: 170 sec
+Flight Time: 171 sec
+Flight Time: 172 sec
+Flight Time: 173 sec
+Flight Time: 174 sec
+Flight Time: 175 sec
+Flight Time: 176 sec
+FLIGHT_STATE_POST_APOGEE: Detected Main Chute at 380.903809m
+FLIGHT_STATE_MAIN_CHUTE: Igniting recovery circuit for the main chute
+Flight Time: 177 sec
+Flight Time: 178 sec
+Flight Time: 179 sec
+Flight Time: 180 sec
+Flight Time: 181 sec
+Flight Time: 182 sec
+Flight Time: 183 sec
+Flight Time: 184 sec
+Flight Time: 185 sec
+Flight Time: 186 sec
+Flight Time: 187 sec
+Flight Time: 188 sec
+Flight Time: 189 sec
+Flight Time: 190 sec
+Flight Time: 191 sec
+Flight Time: 192 sec
+Flight Time: 193 sec
+Flight Time: 194 sec
+FLIGHT_STATE_POST_MAIN: Detected landing at -4.398926m
+FLIGHT_STATE_LANDED: Rocket landed!
+FLIGHT_STATE_EXIT: Exit!
+Flight Time: 195 sec
+Flight Time: 196 sec
+Flight Time: 197 sec
+Flight Time: 198 sec
+Flight Time: 199 sec
+Flight Time: 200 sec
+Flight Time: 201 sec
+Flight Time: 202 sec
+Flight Time: 203 sec
+Flight Time: 204 sec
+Flight Time: 205 sec
+Flight Time: 206 sec
+Flight Time: 207 sec
+Flight Time: 208 sec
+Flight Time: 209 sec
+Flight Time: 210 sec
+Flight Time: 211 sec
+Flight Time: 212 sec
+Flight Time: 213 sec
+Flight Time: 214 sec
+Flight Time: 215 sec
+Flight Time: 216 sec
+Flight Time: 217 sec
+Flight Time: 218 sec
+Flight Time: 219 sec
+C++ DataFeeder has successfully exited.
+Process finished with exit code -1073741510 (0xC000013A: interrupted by Ctrl+C)

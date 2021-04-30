@@ -1,0 +1,12 @@
+cmake-build-debug/
+.idea/
+bin/
+generated/
+BUILD.BAT
+CLEAN.BAT
+build-on-linux/BUILD
+build-on-linux/CLEAN
+/Debug/
+/Release/
+root/
+venv/
