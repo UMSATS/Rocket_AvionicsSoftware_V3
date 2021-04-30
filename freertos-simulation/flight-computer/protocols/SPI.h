@@ -85,6 +85,12 @@ int spi2_read(uint8_t *addr_buffer, uint8_t *rx_buffer, uint16_t total_size, uin
 
 int spi3_read(uint8_t *addr_buffer, uint8_t *rx_buffer, uint16_t total_size, uint32_t timeout);
 
+int spi1_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout );
+
+int spi2_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout );
+int spi3_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout );
+
+
 
 // Description:  DO NOT USE! Will be deleted in future versions of the code!
 //  This function transfers one or more bytes over the SPI bus.
@@ -100,6 +106,8 @@ int spi1_transmit(uint8_t *reg_addr, uint8_t *tx_buffer, uint16_t total_size, ui
 int spi2_transmit(uint8_t *reg_addr, uint8_t *tx_buffer, uint16_t total_size, uint32_t timeout);
 
 int spi3_transmit(uint8_t *reg_addr, uint8_t *tx_buffer, uint16_t total_size, uint32_t timeout);
+
+
 
 #ifdef __cplusplus
 }
