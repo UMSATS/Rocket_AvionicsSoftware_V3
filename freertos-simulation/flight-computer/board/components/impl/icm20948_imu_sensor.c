@@ -19,30 +19,28 @@
 // INCLUDES
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "board/components/imu_sensor.h"
-#include "board-hardware-drivers/BMI08x-Sensor-API/Inc/bmi088.h"
 #include "protocols/SPI.h"
-#include "board-hardware-drivers/BMI08x-Sensor-API/Inc/bmi08x.h"
 #include "cmsis_os.h"
 #include "utilities/common.h"
 #include "math.h"
 #include "board/hardware_definitions.h"
 
 #define INTERNAL_ERROR -127
-#define ACC_TYPE                                        0x800000
-#define GYRO_TYPE                                       0x400000
+#define ACC_TYPE                                        (uint8_t) 0x140000
+#define GYRO_TYPE                                       (uint8_t) 0x100000
 
 #define ACC_LENGTH                                      6 // Length of a accelerometer measurement in bytes.
 #define GYRO_LENGTH                                     6 // Length of a gyroscope measurement in bytes.
 
-#define CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH	        BMI08X_ACCEL_BW_NORMAL
-#define CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR			    BMI08X_ACCEL_ODR_100_HZ
-#define CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE		        BMI088_ACCEL_RANGE_12G
-#define CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER			    BMI08X_ACCEL_PM_ACTIVE
-
-#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH	    BMI08X_GYRO_BW_23_ODR_200_HZ
-#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR		        BMI08X_GYRO_BW_23_ODR_200_HZ
-#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE		    BMI08X_GYRO_RANGE_1000_DPS
-#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER		    BMI08X_GYRO_PM_NORMAL
+//#define CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH	        BMI08X_ACCEL_BW_NORMAL
+//#define CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR			    BMI08X_ACCEL_ODR_100_HZ
+//#define CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE		        BMI088_ACCEL_RANGE_12G
+//#define CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER			    BMI08X_ACCEL_PM_ACTIVE
+//
+//#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH	    BMI08X_GYRO_BW_23_ODR_200_HZ
+//#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR		        BMI08X_GYRO_BW_23_ODR_200_HZ
+//#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE		    BMI08X_GYRO_RANGE_1000_DPS
+//#define CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER		    BMI08X_GYRO_PM_NORMAL
 
 #define SWO_Pin GPIO_PIN_4      // this is for the chip select pin TODO: change
 #define SWO_GPIO_Port GPIOB     // if this value is changed make sure it is changed in the IMU.c file (readIMU and writeIMU) TODO: change
@@ -66,56 +64,49 @@ static IMUSensorTaskState prvController     = {};
 static QueueHandle_t s_queue = {0};
 static uint8_t s_desired_processing_data_rate = 50;
 
-//Wrapper functions for read and write
-int8_t user_spi_read (uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
-int8_t user_spi_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len);
-
+// Wrapper functions for read and write
 int icm20948_get_data ( uint8_t regAddress, int numBytes, uint8_t * dReturned );
-
+int icm20948_set_data ( uint8_t regAddress, int numBytes, const uint8_t * dBuffer );
+int icm20948_get_accel_data ( IMUSensorData * data );
+int icm20948_get_gyro_data ( IMUSensorData * data );
 
 void delay_ms(uint32_t period_ms);
 
 // configuration functions for accelerometer and gyroscope
 static int8_t accel_config(IMUSensorConfiguration * configParams);
 static int8_t gyro_config (IMUSensorConfiguration * configParams);
+int select_active_bank ( int bank );
+
 static float imu_sensor_acc2g                ( int16_t acc_value );
 static float imu_sensor_g2acc                ( float g );
 static float imu_sensor_rot2deg_per_sec      ( int16_t gyro_value );
 static float imu_sensor_deg_per_sec2rot      ( float deg_per_sec );
 
-static struct bmi08x_dev s_device = {
-        .accel_id = 0,
-        .gyro_id = 1,
-        .intf = BMI08X_SPI_INTF, // determines if we use SPI or I2C
-        .read = user_spi_read,   //a function pointer to our spi read function
-        .write = user_spi_write, //a function pointer to our spi write function
-        .delay_ms = delay_ms//user_delay_milli_sec
-};
 
 static const struct imu_sensor_configuration s_default_configuration = {
 
-        .accel_bandwidth                = CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH,
-        .accel_output_data_rate         = CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR,
-        .accel_range                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE,
-        .accel_power                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER,
-
-        .gyro_bandwidth                 = CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH,
-        .gyro_output_data_rate          = CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR,
-        .gyro_range                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE,
-        .gyro_power                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER,
+//        .accel_bandwidth                = CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH,
+//        .accel_output_data_rate         = CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR,
+//        .accel_range                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE,
+//        .accel_power                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER,
+//
+//        .gyro_bandwidth                 = CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH,
+//        .gyro_output_data_rate          = CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR,
+//        .gyro_range                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE,
+//        .gyro_power                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER,
 };
 
 static struct imu_sensor_configuration s_current_configuration = {
 
-        .accel_bandwidth                = CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH,
-        .accel_output_data_rate         = CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR,
-        .accel_range                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE,
-        .accel_power                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER,
-
-        .gyro_bandwidth                 = CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH,
-        .gyro_output_data_rate          = CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR,
-        .gyro_range                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE,
-        .gyro_power                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER,
+//        .accel_bandwidth                = CONFIG_IMU_SENSOR_DEFAULT_ACC_BANDWIDTH,
+//        .accel_output_data_rate         = CONFIG_IMU_SENSOR_DEFAULT_ACC_ODR,
+//        .accel_range                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_RANGE,
+//        .accel_power                    = CONFIG_IMU_SENSOR_DEFAULT_ACC_POWER,
+//
+//        .gyro_bandwidth                 = CONFIG_IMU_SENSOR_DEFAULT_GYRO_BANDWIDTH,
+//        .gyro_output_data_rate          = CONFIG_IMU_SENSOR_DEFAULT_GYRO_ODR,
+//        .gyro_range                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_RANGE,
+//        .gyro_power                     = CONFIG_IMU_SENSOR_DEFAULT_GYRO_POWER,
 };
 
 static float imu_sensor_acc2g ( int16_t acc_value )
@@ -173,22 +164,31 @@ int imu_sensor_configure (IMUSensorConfiguration * parameters )
         s_current_configuration = *parameters;
     }
 
-    int status = BMI08X_OK;
+    int status = IMU_OK;
+
+    select_active_bank (0 );
+    uint8_t pwrMGMT[1] = {1};
+
+    status = icm20948_set_data (0x06, 1, pwrMGMT );
+    if(status != IMU_OK)
+    {
+        return status;
+    }
 
     status = accel_config(&s_current_configuration);
-    if(status != BMI08X_OK)
+    if(status != IMU_OK)
     {
         return status;
     }
 
     status = gyro_config(&s_current_configuration);
-    if(status != BMI08X_OK)
+    if(status != IMU_OK)
     {
         return status;
     }
 
 
-    return BMI08X_OK;
+    return IMU_OK;
 }
 
 
@@ -200,10 +200,6 @@ int imu_sensor_init()
         return status;
     }
 
-    status = bmi088_init(&s_device); // bosch API initialization method
-    if(status != BMI08X_OK)
-        return status;
-
     s_queue = xQueueCreate(10, sizeof(IMUSensorData));
     if (s_queue == NULL) {
         return 2;
@@ -211,9 +207,8 @@ int imu_sensor_init()
 
     vQueueAddToRegistry(s_queue, "bmi088_queue");
 
-
     prvController.isInitialized = 1;
-    return BMI08X_OK;
+    return IMU_OK;
 }
 
 static void prv_imu_sensor_controller_task(void * pvParams)
@@ -228,7 +223,6 @@ static void prv_imu_sensor_controller_task(void * pvParams)
     //vTaskDelay(pdMS_TO_TICKS(100));//Wait so to make sure the other tasks have started.
 
     int8_t result_flag;
-    struct bmi08x_sensor_data container;
 
     TickType_t start_timestamp =  xTaskGetTickCount();
 
@@ -236,28 +230,22 @@ static void prv_imu_sensor_controller_task(void * pvParams)
 
     while(prvController.isRunning)
     {
-        result_flag = icm20948_get_data(&container, &s_device);
-        if(SPI_OK != result_flag)
-        {
-            continue;
-        }
-        dataStruct.acc_x = container.x,
-        dataStruct.acc_y = container.y,
-        dataStruct.acc_z = container.z;
-
-        result_flag = bmi08g_get_data(&container, &s_device);
+        result_flag = icm20948_get_accel_data (&dataStruct);
         if(SPI_OK != result_flag)
         {
             continue;
         }
 
-        dataStruct.gyro_x = container.x,
-        dataStruct.gyro_y = container.y,
-        dataStruct.gyro_z = container.z;
+        result_flag = icm20948_get_gyro_data (&dataStruct);
+        if(SPI_OK != result_flag)
+        {
+            continue;
+        }
 
         dataStruct.timestamp = xTaskGetTickCount() - start_timestamp;
 
         imu_add_measurement(&dataStruct);
+
         vTaskDelayUntil(&dataStruct.timestamp, s_desired_processing_data_rate);
     }
 
@@ -267,6 +255,7 @@ static void prv_imu_sensor_controller_task(void * pvParams)
 int imu_sensor_start(void * const param)
 {
     DEBUG_LINE("pressure_sensor_start\r\n");
+
     //Get the parameters.
     if ( !prvController.isInitialized )
     {
@@ -275,14 +264,7 @@ int imu_sensor_start(void * const param)
 
     prvController.taskParameters = param;
 
-//    TaskHandle_t xTask = controller.taskHandle;
-//    TaskStatus_t pxTaskStatus;
-//    BaseType_t xGetFreeStackSpace = 0;
-//    eTaskState eState = eInvalid;
-//    vTaskGetInfo(xTask, &pxTaskStatus, xGetFreeStackSpace, eState);
-
-
-    if ( pdFALSE == xTaskCreate(prv_imu_sensor_controller_task, "imu-manager", configMINIMAL_STACK_SIZE, prvController.taskParameters, 5, &prvController.taskHandle ) )
+    if ( pdFALSE == xTaskCreate ( prv_imu_sensor_controller_task, "imu-manager", configMINIMAL_STACK_SIZE, prvController.taskParameters, 5, &prvController.taskHandle ) )
     {
         return IMU_ERR;
     }
@@ -319,108 +301,39 @@ void imu_sensor_data_pack(IMUSensorData reading, uint8_t* buffer, uint32_t times
     common_write_16(reading.gyro_z, &buffer[13]);
 }
 
-//set the accelerometer starting configurations
-int8_t accel_config(IMUSensorConfiguration * configParams){
-    uint8_t data = 0;
-    int8_t rslt;
+// set the accelerometer starting configurations
+int8_t accel_config(IMUSensorConfiguration * configParams)
+{
+    select_active_bank(2);
 
-    /* Read accel chip id */
-    rslt = bmi08a_get_regs(BMI08X_ACCEL_CHIP_ID_REG, &data, 1, &s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-    
-    /* Assign the desired configurations */
-    //Not sure yet what configurations we want
-    s_device.accel_cfg.bw    = configParams->accel_bandwidth;
-    s_device.accel_cfg.odr   = configParams->accel_output_data_rate;
-    s_device.accel_cfg.range = configParams->accel_range;
-    s_device.accel_cfg.power = configParams->accel_power;
+    uint8_t prevSettings [ 2 ];
+    icm20948_get_data ( (uint8_t) 0x140000, 2, prevSettings );
+    prevSettings [ 0 ] |= 6;
+    icm20948_set_data ( (uint8_t) 0x140000, 2, prevSettings );
 
-    rslt                     = bmi08a_set_power_mode(&s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-    /* Wait for 10ms to switch between the power modes - delay_ms taken care inside the function*/
-
-    rslt = bmi08a_set_meas_conf(&s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-
-    return rslt;
+    select_active_bank(0);
+    return IMU_OK;
 }
 
-//set the accelerometer starting configurations
+// set the accelerometer starting configurations
 int8_t gyro_config(IMUSensorConfiguration * configParams)
 {
-    uint8_t data = 0;
-    int8_t rslt;
+    select_active_bank (2 );
 
-    /* Read gyro chip id */
-    rslt = bmi08g_get_regs(BMI08X_GYRO_CHIP_ID_REG, &data, 1, &s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-    
-    
-    //set power mode
-    s_device.gyro_cfg.power = configParams->gyro_power;
-    rslt                    = bmi08g_set_power_mode(&s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-    
-    /* Wait for 30ms to switch between the power modes - delay_ms taken care inside the function*/
-    /* Assign the desired configurations */
-   s_device.gyro_cfg.odr    = configParams->gyro_output_data_rate;
-   s_device.gyro_cfg.range  = configParams->gyro_range;
-   s_device.gyro_cfg.bw     = configParams->gyro_bandwidth;
-   s_device.gyro_id         = data;
+    uint8_t prevSettings [ 2 ];
+    icm20948_get_data ( (uint8_t) 0x100000, 2, prevSettings );
+    prevSettings [ 0 ] |= 6;
+    icm20948_set_data ( (uint8_t) 0x100000, 2, prevSettings );
 
-    rslt = bmi08g_set_meas_conf(&s_device);
-    if(rslt != BMI08X_OK)
-        return rslt;
-    
-    return rslt;
+    select_active_bank (0 );
+    return IMU_OK;
 }
 
-int8_t user_spi_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len)
-{
-    int status;
-    //debug removeHAL_GPIO_WritePin(USR_LED_PORT,USR_LED_PIN, GPIO_PIN_SET);
-    if(dev_addr == 0x00 || dev_addr == 0x1E)
-    {
-        //Accelerometer.
-        if( (status = spi3_receive (&reg_addr,1, data, len, 10) ) != 0) // The register address will always be 1.
-        {
-            return status;
-        }
-    }
-    else if(dev_addr == 0x01|| dev_addr == 0x0F)
-    {
-//        //Gyroscope.
-        if( (status = spi3_receive (&reg_addr,1, data, len, 11) ) != 0) // The register address will always be 1.
-        {
-            return status;
-        }
-    }
 
-    //delay_ms(500);
-    //HAL_GPIO_WritePin(USR_LED_PORT,USR_LED_PIN, GPIO_PIN_RESET);
-    //delay_ms(500);
-    return BMI08X_OK;
-}
-
-int8_t user_spi_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len){
-
-    if(dev_addr == 0x00 || dev_addr == 0x1E){
-    spi3_send(&reg_addr,1, data, len, 10);
-    }
-    else if(dev_addr == 0x01 || dev_addr == 0x0F){
-        spi3_send(&reg_addr,1, data, len, 11);
-    }
-    return BMI08X_OK;
-}
 
 void delay_ms ( uint32_t period_ms )
 {
-    if ( taskSCHEDULER_NOT_STARTED == xTaskGetSchedulerState() )
+    if ( taskSCHEDULER_NOT_STARTED == xTaskGetSchedulerState ( ) )
     {
         board_delay(period_ms);
     }
@@ -430,23 +343,6 @@ void delay_ms ( uint32_t period_ms )
     }
 }
 
-
-static int8_t __imu_config(IMUSensorConfiguration * parameters)
-{
-    int8_t result = accel_config(parameters);
-    if(result != BMI08X_OK)
-    {
-        return false;
-    }
-
-    result = gyro_config(parameters);
-    if(result != BMI08X_OK)
-    {
-        return false;
-    }
-    
-    return result == BMI08X_OK;
-}
 
 IMUSensorConfiguration imu_sensor_get_default_configuration ( )
 {
@@ -463,48 +359,6 @@ void imu_sensor_set_desired_processing_data_rate(uint32_t rate)
     s_desired_processing_data_rate = rate;
 }
 
-int imu_sensor_test()
-{
-//    int8_t result;
-//    result = bmi08a_perform_selftest(s_bmp3_sensor->bmi088_ptr);
-//    if(result != BMI08X_OK)
-//        return false;
-//
-//    result = bmi08g_perform_selftest(s_bmp3_sensor->bmi088_ptr);
-//    if(result != BMI08X_OK)
-//        return false;
-    
-    char res = 0;
-    uint8_t id = 0x1E;
-    
-    uint8_t command[] = {0x80};
-    uint8_t id_read[] = {0x00,0x00,0x00,0x00};
-    uint8_t id_dummy[] = {0x00,0x00};
-    
-    
-    spi3_receive(command,1,id_dummy,2,10);
-    spi3_receive(command,1,id_read,2,10);
-    
-    if(id_read[1] == id)
-    {
-        res += 1;
-    }
-    
-    spi3_receive(command,1,id_read,2,11);
-    
-    if(id_read[0] == 0x0F)
-    {
-        res += 1;
-    }
-    
-    if(res == 2)
-    {
-        return 1;
-    }
-    
-    return 0;
-}
-
 bool imu_add_measurement (IMUSensorData * _data)
 {
     return pdTRUE == xQueueSend(s_queue, _data,0);
@@ -512,22 +366,19 @@ bool imu_add_measurement (IMUSensorData * _data)
 
 
 
-
 int icm20948_get_data ( uint8_t regAddress, int numBytes, uint8_t * dReturned )
 {
-    int i;
-    for ( i = 0; i < numBytes; i++ )
+    for ( int i = 0; i < numBytes; i++ )
     {
         // get one byte at a time
         //Every register on IMU is only 8 bits wide
         //So for this function we will always only send 1 byte and have 1 byte returned
         //Because SPI, 2 bytes needs to be sent with the first being a dummy
         //The second byte read will be real data
-        uint8_t dataTx[2];
-        uint8_t dataRx[2];
-        dataTx[0] = regAddress | 0x80; // make the 7th bit high to show its a read op
-        dataTx[1] = 0x80; //setting dummy data
-        HAL_GPIO_WritePin(SWO_GPIO_Port, SWO_Pin, GPIO_PIN_RESET); // CS goes low to activate device
+        uint8_t dataTx [ 2 ];
+        uint8_t dataRx [ 2 ];
+        dataTx [ 0 ] = regAddress | 0x80; // make the 7th bit high to show its a read op
+        dataTx [ 1 ] = 0x80; // setting dummy data
 
         int status;
 
@@ -536,10 +387,86 @@ int icm20948_get_data ( uint8_t regAddress, int numBytes, uint8_t * dReturned )
             return status;
         }
 
-        HAL_GPIO_WritePin(SWO_GPIO_Port, SWO_Pin, GPIO_PIN_SET); // CS goes high
         dReturned[i] = dataRx[1];
         regAddress++;
     }
 
     return SPI_OK;
+}
+
+
+int icm20948_set_data ( uint8_t regAddress, int numBytes, const uint8_t * dBuffer )
+{
+    for ( int i = 0; i < numBytes; i++ )
+    {
+        //one byte at a time again
+        uint8_t dataTx [ 2 ];
+        dataTx [ 0 ] = regAddress;
+        dataTx [ 1 ] = dBuffer [ i ];
+
+        int status;
+
+        if ( (status = spi3_single_transmit_only (dataTx, 2, 100) ) != 0 )
+        {
+            return status;
+        }
+
+        regAddress++;
+    }
+
+    return SPI_OK;
+}
+
+
+int icm20948_get_accel_data ( IMUSensorData * data )
+{
+    //data is in x,y,z order
+    float dBuffer   [ 3 ];
+    uint8_t rawData [ 6 ];
+    IMUStatus status;
+
+    status = icm20948_get_data ( 45, 6, rawData );
+    if(status != IMU_OK)
+    {
+        return status;
+    }
+
+    for ( int i = 0; i < 6; i = i + 2 )
+    {
+        int16_t combinedVal = ( int16_t ) ( ( ( ( uint16_t ) rawData [ i ] ) << 8 ) | rawData [ i + 1 ] );
+        dBuffer [ i/2 ] = combinedVal / SENSSCALEACCEL; // data sheet says to do this
+    }
+
+    memcpy ( &data->acc_x, dBuffer, sizeof ( float ) * 3 );
+    return 1;
+}
+
+int icm20948_get_gyro_data ( IMUSensorData * data )
+{
+    float dBuffer   [ 3 ];
+    uint8_t rawData [ 6 ];
+    IMUStatus status;
+
+    status = icm20948_get_data ( 51, 6, rawData );
+    if(status != IMU_OK)
+    {
+        return status;
+    }
+
+    for ( int i = 0; i < 6; i = i + 2 )
+    {
+        int16_t combinedVal = ( int16_t ) ( ( ( ( uint16_t ) rawData [ i ] ) << 8 ) | rawData [ i + 1 ] );
+        dBuffer [ i/2 ] = combinedVal / SENSSCALEGYRO; // data sheet says to do this
+    }
+
+    memcpy ( &data->gyro_x, dBuffer, sizeof ( float ) * 3 );
+    return 1;
+}
+
+int select_active_bank ( int bank )
+{
+    uint8_t dataOut [ 1 ];
+    dataOut[0] = bank << 4;
+
+    return icm20948_set_data (127, 1, dataOut );
 }

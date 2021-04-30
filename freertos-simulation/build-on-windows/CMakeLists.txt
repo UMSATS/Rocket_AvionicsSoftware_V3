@@ -166,7 +166,7 @@ ELSE()
             ../flight-computer/protocols/impl/SPI.c
 
             # sensors
-            ../flight-computer/board/components/impl/imu_sensor.c
+            ../flight-computer/board/components/impl/icm20948_imu_sensor.c
             ../flight-computer/board/components/impl/pressure_sensor.c
             ../flight-computer/board/components/impl/buzzer.c
             ../flight-computer/board/components/flash.c
