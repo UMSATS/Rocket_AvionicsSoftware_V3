@@ -463,6 +463,7 @@ int icm20948_get_gyro_data ( IMUSensorData * data )
     return 1;
 }
 
+
 int select_active_bank ( int bank )
 {
     uint8_t dataOut [ 1 ];
