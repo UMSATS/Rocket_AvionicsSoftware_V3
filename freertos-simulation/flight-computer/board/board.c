@@ -28,7 +28,14 @@ BoardStatus board_init ( void )
 
 void board_delay ( uint32_t ms )
 {
-    HAL_Delay ( ms );
+    if ( taskSCHEDULER_NOT_STARTED == xTaskGetSchedulerState() )
+    {
+        HAL_Delay ( ms );
+    }
+    else
+    {
+        vTaskDelay(pdMS_TO_TICKS ( ms ) );
+    }
 }
 
 void board_led_blink ( uint32_t ms )
@@ -106,11 +113,11 @@ void GPIO_init ( void )
 
 void board_error_handler ( const char * file, uint32_t line )
 {
+    DISPLAY_LINE( "%s:%lu:ERROR!", file, line );
     /* User can add his own implementation to report the HAL error return state */
     while ( 1 )
     {
-        DISPLAY_LINE( "%s:%lu:ERROR!", file, line );
-        // board_led_blink(50);
+        board_led_blink(50);
     }
 }
 
