@@ -27,7 +27,7 @@
  *  @todo I strongly consider changing all the macros that represent constants
  *  to static const type to ensure type safety! This requires a discussion
  */
-#define FLASH_MANUFACTURER_ID          0x01
+#define FLASH_MANUFACTURER_ID          0xC2
 #define FLASH_DEVICE_ID_MSB            0x02
 #define FLASH_DEVICE_ID_LSB            0x16
 #define FLASH_HIGH_BYTE_MASK_24B       0x00FF0000

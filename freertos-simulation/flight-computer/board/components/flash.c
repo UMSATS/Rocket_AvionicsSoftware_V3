@@ -307,11 +307,11 @@ FlashStatus flash_check_id ( )
         return FLASH_ERR;
     }
 
-    uint8_t id[3] = { 0, 0, 0 };
+    uint8_t id [ 3 ] = { 0, 0, 0 };
 
     if ( FLASH_OK == prvExecuteCommand ( 0, FLASH_READ_ID, id, 3 ) )
     {
-        if ( id[ 0 ] == FLASH_MANUFACTURER_ID && id[ 1 ] == FLASH_DEVICE_ID_MSB && id[ 2 ] == FLASH_DEVICE_ID_LSB )
+        if ( id [ 0 ] == FLASH_MANUFACTURER_ID /* && id[ 1 ] == FLASH_DEVICE_ID_MSB && id[ 2 ] == FLASH_DEVICE_ID_LSB */ )
         {
             return FLASH_OK;
         }
