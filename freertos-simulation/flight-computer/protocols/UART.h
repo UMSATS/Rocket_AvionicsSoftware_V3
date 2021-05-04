@@ -30,7 +30,7 @@ extern "C" {
 
 typedef enum
 {
-    UART_ERR = 0, UART_OK = 1
+    UART_OK = 0, UART_ERR = 1
 } UARTStatus;
 
 char PRINT_BUFFER[BUFFER_SIZE];
@@ -67,10 +67,8 @@ char PRINT_BUFFER[BUFFER_SIZE];
             taskEXIT_CRITICAL( );                                                            \
 
 
-#define INPUT( x ) const char * t = uart6_receive_command(); memcpy(x, t, strlen(t))
-
 int UART_Port2_init ( void );
-char * uart2_receive_command ( );
+int uart2_receive_command ( const char * pData );
 int uart2_transmit ( char const * message );
 int uart2_transmit_bytes ( uint8_t * bytes, uint16_t numBytes );
 int uart2_transmit_line_debug ( char const * message );
@@ -82,7 +80,7 @@ int uart6_transmit_line ( char const * message );
 int uart6_transmit_line_debug ( char const * message );
 int uart6_transmit_bytes ( uint8_t * bytes, uint16_t numBytes );
 int uart6_transmit_debug ( char const * message );
-char * uart6_receive_command ( );
+int uart6_receive_command ( const char * pData );
 
 int uart2_receive ( uint8_t * buf, size_t size );
 int uart6_receive ( uint8_t * buf, size_t size );

@@ -62,11 +62,15 @@ int UART_Port2_init ( void )
     uart2.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
 //    uart2.Init.OverSampling = UART_OVERSAMPLING_16;
 
-    status = !HAL_UART_Init ( &uart2 );
+    status = HAL_UART_Init ( &uart2 );
 
-    return status;
+    if ( status != HAL_OK )
+    {
+        return status;
+    }
+
+    return UART_OK;
 }
-
 int UART_Port6_init ( void )
 {
     HAL_StatusTypeDef status;
@@ -98,11 +102,16 @@ int UART_Port6_init ( void )
     uart6.Init.Mode         = UART_MODE_TX_RX;
     uart6.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
     uart6.Init.OverSampling = UART_OVERSAMPLING_16;
-    status = !HAL_UART_Init ( &uart6 );
 
-    return status;
+    status = HAL_UART_Init ( &uart6 );
+
+    if ( status != HAL_OK )
+    {
+        return status;
+    }
+
+    return UART_OK;
 }
-
 static int uart_transmit ( UART_HandleTypeDef * huart, const char * message, bool flush )
 {
     HAL_StatusTypeDef status;
@@ -122,9 +131,14 @@ static int uart_transmit ( UART_HandleTypeDef * huart, const char * message, boo
         status = HAL_UART_Transmit ( huart, prvBufftx, sizeof ( uint8_t ) * i, TIMEOUT_MAX );
     }
     portEXIT_CRITICAL( );
-    return status;
-}
 
+    if ( status != HAL_OK )
+    {
+        return status;
+    }
+
+    return UART_OK;
+}
 int uart6_transmit_debug ( char const * message )
 {
 #if defined(PRINT_DEBUG_LOG)
@@ -147,10 +161,16 @@ static int uart_transmit_bytes ( UART_HandleTypeDef * huart, uint8_t * bytes, ui
 {
     HAL_StatusTypeDef status;
     status = HAL_UART_Transmit ( huart, bytes, numBytes, TIMEOUT_MAX );
-    return status;
+
+    if ( status != HAL_OK )
+    {
+        return status;
+    }
+
+    return UART_OK;
 }
 
-static char * uart_receive_command ( UART_HandleTypeDef * huart )
+static int uart_receive_command ( UART_HandleTypeDef * huart, const char * pToData )
 {
     uint8_t c; //key pressed character
     size_t  i;
@@ -164,7 +184,7 @@ static char * uart_receive_command ( UART_HandleTypeDef * huart )
         //get character (BLOCKING COMMAND)
         if ( HAL_UART_Receive ( huart, &c, 1, 0xFFFF ) != HAL_OK )
         {
-            //did not receive character for some reason.
+            return UART_ERR;
         }
 
         //print the character back.
@@ -173,7 +193,7 @@ static char * uart_receive_command ( UART_HandleTypeDef * huart )
 
             if ( HAL_UART_Transmit ( huart, &c, sizeof ( c ), TIMEOUT_MAX ) != HAL_OK )
             {
-                //Do something meaningful here...
+                return UART_ERR;
             }
 
             //adjust our buffer
@@ -201,12 +221,14 @@ static char * uart_receive_command ( UART_HandleTypeDef * huart )
     c = '\n';
     if ( HAL_UART_Transmit ( huart, &c, sizeof ( c ), TIMEOUT_MAX ) != HAL_OK )
     {
-        //handle transmission error
+        return UART_ERR;
     }
 
     prvBuffrx[ i ] = '\0'; //string terminator added to the end of the message
 
-    return ( char * ) prvBuffrx;
+    pToData = ( char * )  prvBufftx;
+
+    return UART_OK;
 }
 
 static int uart_receive ( UART_HandleTypeDef * huart, uint8_t * buf, size_t size )
@@ -217,11 +239,18 @@ static int uart_receive ( UART_HandleTypeDef * huart, uint8_t * buf, size_t size
         //get character (BLOCKING COMMAND)
         if ( HAL_UART_Receive ( huart, &buf[ i++ ], 1, 0xFFFF ) != HAL_OK )
         {
-            return i == size;
+            if ( i == size )
+            {
+                return UART_OK;
+            }
+            else
+            {
+                return UART_ERR;
+            }
         }
     }
 
-    return true;
+    return UART_OK;
 }
 
 int uart2_transmit ( const char * message )
@@ -248,9 +277,9 @@ int uart2_transmit_bytes ( uint8_t * bytes, uint16_t numBytes )
     return uart_transmit_bytes ( &uart2, bytes, numBytes );
 }
 
-char * uart2_receive_command ( )
+int uart2_receive_command ( const char * pData )
 {
-    return uart_receive_command ( &uart2 );
+    return uart_receive_command ( &uart2, pData );
 }
 
 int uart2_receive ( uint8_t * buf, size_t size )
@@ -273,9 +302,9 @@ int uart6_transmit_bytes ( uint8_t * bytes, uint16_t numBytes )
     return uart_transmit_bytes ( &uart6, bytes, numBytes );
 }
 
-char * uart6_receive_command ( )
+int uart6_receive_command ( const char * pData )
 {
-    return uart_receive_command ( &uart6 );
+    return uart_receive_command ( &uart6, pData );
 }
 
 int uart6_receive ( uint8_t * buf, size_t size )
