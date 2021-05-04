@@ -164,7 +164,7 @@ int main( void )
         board_error_handler( __FILE__, __LINE__ );
     }
 
-    if ( ! UART_Port6_init() )
+    if ( UART_OK != UART_Port6_init() )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -227,8 +227,8 @@ int main( void )
         DEBUG_LINE( "Memory Manager has been started.");
     }
 
-    command_line_interface_start ( NULL );
-    flight_controller_start ( NULL );
+//    command_line_interface_start ( NULL );
+//    flight_controller_start ( NULL );
 
     vTaskStartScheduler ( );
     for ( ;; );
