@@ -219,7 +219,7 @@ static void prv_flight_controller_task(void * pvParams)
         // # 1 set the ground pressure and temperature as references for the future calculations
         DEBUG_LINE( "Flight Controller: waiting for the ground pressure & temperature...");
         PressureSensorData initialGroundPressureData;
-        while (!pressure_sensor_read(&initialGroundPressureData));
+        while ( ! pressure_sensor_read ( &initialGroundPressureData ) );
         DEBUG_LINE( "Flight Controller: ground pressure & temperature have been set!");
 
         system_configurations.ground_pressure    = initialGroundPressureData.pressure;
@@ -234,7 +234,7 @@ static void prv_flight_controller_task(void * pvParams)
         event_detector_update_configurations(&system_configurations);
 
         // write these configurations to the memory
-        if (memory_manager_set_system_configurations ( &system_configurations ) != MEM_OK)
+        if ( memory_manager_set_system_configurations ( &system_configurations ) != MEM_OK)
         {
             board_error_handler(__FILE__, __LINE__);
         }
@@ -261,26 +261,27 @@ static void prv_flight_controller_task(void * pvParams)
     int start_time  = 0;
     int last_time   = 0;
     int seconds     = 0;
+
     while ( prvTaskState.isRunning )
     {
 //        flightData.timestamp = xTaskGetTickCount ( ) - start_time;
 
-        get_sensor_data_update(&flightData);
+        get_sensor_data_update ( &flightData );
 
         event_detector_feed ( &flightData, &flightState );
 
         flight_state_machine_tick ( flightState, &flightData );
 
-        memory_manager_user_data_update( &flightData );
+        memory_manager_user_data_update ( &flightData );
 
-        memset(&flightData, 0, sizeof(DataContainer));
+        memset ( &flightData, 0, sizeof ( DataContainer ) );
 
-        if ( ( xTaskGetTickCount() - last_time ) / configTICK_RATE_HZ >= 1 )
+        if ( ( xTaskGetTickCount ( ) - last_time ) / configTICK_RATE_HZ >= 1 )
         {
             seconds++;
 //            DEBUG_LINE( "Flight Time: %d sec", seconds);
-            last_time = (xTaskGetTickCount() - start_time);
-            DEBUG_LINE ( "CURRENT ALTITUDE : %f", event_detector_current_altitude () );
+            last_time = ( xTaskGetTickCount ( ) - start_time );
+//            DEBUG_LINE ( "CURRENT ALTITUDE : %f", event_detector_current_altitude ( ) );
         }
     }
 

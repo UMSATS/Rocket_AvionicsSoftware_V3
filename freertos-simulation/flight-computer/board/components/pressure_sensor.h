@@ -49,7 +49,7 @@ typedef union
     uint8_t bytes[sizeof(PressureSensorData)];
 } PressureSensorDataU;
 
-typedef enum { PRESS_SENSOR_ERR = 0, PRESS_SENSOR_OK = 1 } PressureSensorStatus;
+typedef enum { PRESS_SENSOR_OK = 0, PRESS_SENSOR_ERR = 1 } PressureSensorStatus;
 
 
 int     pressure_sensor_init                ();

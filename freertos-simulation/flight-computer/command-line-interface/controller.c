@@ -289,14 +289,14 @@ void prv_cli_function ( void * pvParams )
     {
         /* Process the input string received prior to the newline. */
 //        DISPLAY(">> ");
-        char * t = NULL;
-        if ( UART_OK  != uart6_receive_command ( t ) )
+        char * pData = NULL;
+        if ( UART_OK  != uart6_receive_command ( &pData ) )
         {
             DISPLAY ( "%s", "Error receiving user input command." );
             continue;
         }
 
-        memcpy ( cInputString, t, strlen ( t ) );
+        memcpy ( cInputString, pData, strlen ( pData ) );
 
 //        memcpy(cInputString, commands[comm_index], strlen(commands[comm_index]));
 //        DISPLAY("cInputString");

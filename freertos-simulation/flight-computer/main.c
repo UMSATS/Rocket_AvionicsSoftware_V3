@@ -179,7 +179,7 @@ int main( void )
     recovery_init( );
     DEBUG_LINE( "Recovery GPIO pins have been set up.");
 
-    if ( ! flash_init() )
+    if ( FLASH_OK != flash_init ( ) )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -187,7 +187,7 @@ int main( void )
         DEBUG_LINE( "Flash ID read successful");
     }
 
-    if ( ! memory_manager_init( ) )
+    if ( MEM_OK != memory_manager_init ( ) )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -195,7 +195,7 @@ int main( void )
         DEBUG_LINE( "Memory Manager has been initialized and configured!");
     }
 
-    if ( ! pressure_sensor_init( NULL ) )
+    if ( PRESS_SENSOR_OK != pressure_sensor_init( NULL ) )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -203,7 +203,7 @@ int main( void )
         DEBUG_LINE( "Pressure sensor has been set up.");
     }
 
-    if ( ! imu_sensor_init( NULL ) )
+    if ( IMU_OK != imu_sensor_init( NULL ) )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -211,7 +211,7 @@ int main( void )
         DEBUG_LINE( "IMU sensor has been set up.");
     }
 
-    if ( ! flight_controller_init(NULL) )
+    if ( FLIGHT_CONTROLLER_OK != flight_controller_init(NULL) )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -227,8 +227,8 @@ int main( void )
         DEBUG_LINE( "Memory Manager has been started.");
     }
 
-//    command_line_interface_start ( NULL );
-//    flight_controller_start ( NULL );
+    flight_controller_start ( NULL );
+    command_line_interface_start ( NULL );
 
     vTaskStartScheduler ( );
     for ( ;; );

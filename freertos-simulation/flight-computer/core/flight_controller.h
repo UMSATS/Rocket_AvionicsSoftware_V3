@@ -4,7 +4,7 @@
 typedef enum FlightState FlightState;
 typedef struct DataContainer DataContainer;
 
-typedef enum { FLIGHT_CONTROLLER_ERR   = 0, FLIGHT_CONTROLLER_OK    = 1 } FlightControllerStatus;
+typedef enum { FLIGHT_CONTROLLER_OK = 0, FLIGHT_CONTROLLER_ERR = 1 } FlightControllerStatus;
 
 FlightControllerStatus flight_controller_init  ( void * pvParams );
 FlightControllerStatus flight_controller_start ( );

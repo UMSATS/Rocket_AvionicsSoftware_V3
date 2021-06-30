@@ -186,23 +186,23 @@ int imu_sensor_init()
     int status = spi3_init();
     if(status != 0)
     {
-        return status;
+        return IMU_ERR;
     }
 
     status = bmi088_init(&s_device); // bosch API initialization method
     if(status != BMI08X_OK)
-        return status;
+        return IMU_ERR;
 
     s_queue = xQueueCreate(10, sizeof(IMUSensorData));
     if (s_queue == NULL) {
-        return 2;
+        return IMU_ERR;
     }
 
     vQueueAddToRegistry(s_queue, "bmi088_queue");
 
 
     prvController.isInitialized = 1;
-    return BMI08X_OK;
+    return IMU_OK;
 }
 
 static void prv_imu_sensor_controller_task(void * pvParams)
@@ -211,7 +211,7 @@ static void prv_imu_sensor_controller_task(void * pvParams)
     IMUSensorConfiguration * configParams = (IMUSensorConfiguration *)pvParams;
     (void)configParams;
 
-    IMUSensorData dataStruct = {};
+    IMUSensorDataU dataStruct = {};
 
     //main loop: continuously read sensor data
     //vTaskDelay(pdMS_TO_TICKS(100));//Wait so to make sure the other tasks have started.
@@ -230,9 +230,9 @@ static void prv_imu_sensor_controller_task(void * pvParams)
         {
             continue;
         }
-        dataStruct.acc_x = container.x,
-        dataStruct.acc_y = container.y,
-        dataStruct.acc_z = container.z;
+        dataStruct.values.acc_x = imu_sensor_acc2g(container.x),
+        dataStruct.values.acc_y = imu_sensor_acc2g(container.y),
+        dataStruct.values.acc_z = imu_sensor_acc2g(container.z);
 
         result_flag = bmi08g_get_data(&container, &s_device);
         if(BMI08X_E_NULL_PTR == result_flag)
@@ -240,22 +240,28 @@ static void prv_imu_sensor_controller_task(void * pvParams)
             continue;
         }
 
-        dataStruct.gyro_x = container.x,
-        dataStruct.gyro_y = container.y,
-        dataStruct.gyro_z = container.z;
+        dataStruct.values.gyro_x = (container.x)*M_PI/180,
+        dataStruct.values.gyro_y = (container.y)*M_PI/180,
+        dataStruct.values.gyro_z = (container.z)*M_PI/180;
 
-        dataStruct.timestamp = xTaskGetTickCount() - start_timestamp;
+        dataStruct.values.timestamp = xTaskGetTickCount() - start_timestamp;
 
-        imu_add_measurement(&dataStruct);
-        vTaskDelayUntil(&dataStruct.timestamp, s_desired_processing_data_rate);
+        imu_add_measurement ( &dataStruct.values );
+        vTaskDelayUntil( &dataStruct.values.timestamp, s_desired_processing_data_rate );
+
+        uart6_transmit_bytes ( dataStruct.bytes, sizeof ( IMUSensorData ) );
+        int i = 0;
+        //        char d [64];
+//        DISPLAY_LINE("gyro [%d,    %d,    %d]", (int) dataStruct.gyro_x, (int) dataStruct.gyro_y, (int) dataStruct.gyro_z);
     }
 
     prvController.isRunning = false;
+    DISPLAY_LINE( "[INFO]: IMU sensor task has been stopped");
+    vTaskDelete( prvController.taskHandle );
 }
 
 int imu_sensor_start(void * const param)
 {
-    DEBUG_LINE("pressure_sensor_start\r\n");
     //Get the parameters.
     if ( !prvController.isInitialized )
     {
@@ -316,7 +322,7 @@ int8_t accel_config(IMUSensorConfiguration * configParams){
     /* Read accel chip id */
     rslt = bmi08a_get_regs(BMI08X_ACCEL_CHIP_ID_REG, &data, 1, &s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
     
     /* Assign the desired configurations */
     //Not sure yet what configurations we want
@@ -327,14 +333,14 @@ int8_t accel_config(IMUSensorConfiguration * configParams){
 
     rslt                     = bmi08a_set_power_mode(&s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
     /* Wait for 10ms to switch between the power modes - delay_ms taken care inside the function*/
 
     rslt = bmi08a_set_meas_conf(&s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
 
-    return rslt;
+    return IMU_OK;
 }
 
 //set the accelerometer starting configurations
@@ -346,14 +352,14 @@ int8_t gyro_config(IMUSensorConfiguration * configParams)
     /* Read gyro chip id */
     rslt = bmi08g_get_regs(BMI08X_GYRO_CHIP_ID_REG, &data, 1, &s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
     
     
     //set power mode
     s_device.gyro_cfg.power = configParams->gyro_power;
     rslt                    = bmi08g_set_power_mode(&s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
     
     /* Wait for 30ms to switch between the power modes - delay_ms taken care inside the function*/
     /* Assign the desired configurations */
@@ -364,9 +370,9 @@ int8_t gyro_config(IMUSensorConfiguration * configParams)
 
     rslt = bmi08g_set_meas_conf(&s_device);
     if(rslt != BMI08X_OK)
-        return rslt;
+        return IMU_ERR;
     
-    return rslt;
+    return IMU_OK;
 }
 
 int8_t user_spi_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len)

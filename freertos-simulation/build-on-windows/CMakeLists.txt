@@ -166,7 +166,7 @@ ELSE()
             ../flight-computer/protocols/impl/SPI.c
 
             # sensors
-            ../flight-computer/board/components/impl/icm20948_imu_sensor.c
+            ../flight-computer/board/components/impl/imu_sensor.c
             ../flight-computer/board/components/impl/pressure_sensor.c
             ../flight-computer/board/components/impl/buzzer.c
             ../flight-computer/board/components/flash.c
@@ -236,7 +236,7 @@ IF(NOT BUILD_FOR_SIM_ON_WIN_OS)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_SOURCE_DIR}/cmake-build-debug/${PROJECT_NAME}.map")
 
     ADD_CUSTOM_TARGET(upload
-            ${GDB} -iex "target remote tcp:localhost:3333"
+            ${GDB} -iex "target extended-remote tcp:localhost:3333"
             -iex "monitor program $<TARGET_FILE:${PROJECT_NAME}.${EXECUTABLE_EXTENSION}>"
             -iex "monitor reset init"
             -iex "disconnect" -iex "quit")

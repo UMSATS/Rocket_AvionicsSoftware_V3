@@ -194,20 +194,22 @@ int imu_sensor_configure (IMUSensorConfiguration * parameters )
 
 int imu_sensor_init()
 {
-    int status = spi3_init();
-    if(status != 0)
+    int status = spi3_init ( );
+    if ( status != 0 )
     {
-        return status;
+        return IMU_ERR;
     }
 
-    s_queue = xQueueCreate(10, sizeof(IMUSensorData));
-    if (s_queue == NULL) {
-        return 2;
+    s_queue = xQueueCreate (10, sizeof ( IMUSensorData ) );
+    if ( s_queue == NULL )
+    {
+        return IMU_ERR;
     }
 
-    vQueueAddToRegistry(s_queue, "bmi088_queue");
+    vQueueAddToRegistry ( s_queue, "bmi088_queue" );
 
     prvController.isInitialized = 1;
+
     return IMU_OK;
 }
 
@@ -250,11 +252,13 @@ static void prv_imu_sensor_controller_task(void * pvParams)
     }
 
     prvController.isRunning = false;
+    DISPLAY_LINE( "[INFO]: IMU sensor task has been stopped");
+    vTaskDelete( prvController.taskHandle );
 }
 
 int imu_sensor_start(void * const param)
 {
-    DEBUG_LINE("pressure_sensor_start\r\n");
+    DISPLAY_LINE( "[INFO]: IMU sensor task has been started");
 
     //Get the parameters.
     if ( !prvController.isInitialized )
@@ -333,14 +337,7 @@ int8_t gyro_config(IMUSensorConfiguration * configParams)
 
 void delay_ms ( uint32_t period_ms )
 {
-    if ( taskSCHEDULER_NOT_STARTED == xTaskGetSchedulerState ( ) )
-    {
-        board_delay(period_ms);
-    }
-    else
-    {
-        vTaskDelay(pdMS_TO_TICKS ( period_ms ) );
-    }
+    board_delay(period_ms);
 }
 
 
@@ -380,18 +377,16 @@ int icm20948_get_data ( uint8_t regAddress, int numBytes, uint8_t * dReturned )
         dataTx [ 0 ] = regAddress | 0x80; // make the 7th bit high to show its a read op
         dataTx [ 1 ] = 0x80; // setting dummy data
 
-        int status;
-
-        if ( (status = spi3_receive ( dataTx, 2, dataRx, 2, 100 ) ) != 0 )
+        if ( SPI_OK != spi3_receive ( dataTx, 2, dataRx, 2, 100 ) )
         {
-            return status;
+            return IMU_ERR;
         }
 
         dReturned[i] = dataRx[1];
         regAddress++;
     }
 
-    return SPI_OK;
+    return IMU_OK;
 }
 
 
@@ -404,17 +399,15 @@ int icm20948_set_data ( uint8_t regAddress, int numBytes, const uint8_t * dBuffe
         dataTx [ 0 ] = regAddress;
         dataTx [ 1 ] = dBuffer [ i ];
 
-        int status;
-
-        if ( (status = spi3_single_transmit_only (dataTx, 2, 100) ) != 0 )
+        if ( SPI_OK != spi3_single_transmit_only ( dataTx, 2, 100 ) )
         {
-            return status;
+            return IMU_ERR;
         }
 
         regAddress++;
     }
 
-    return SPI_OK;
+    return IMU_OK;
 }
 
 
@@ -426,9 +419,9 @@ int icm20948_get_accel_data ( IMUSensorData * data )
     IMUStatus status;
 
     status = icm20948_get_data ( 45, 6, rawData );
-    if(status != IMU_OK)
+    if ( status != IMU_OK )
     {
-        return status;
+        return IMU_ERR;
     }
 
     for ( int i = 0; i < 6; i = i + 2 )
@@ -438,7 +431,7 @@ int icm20948_get_accel_data ( IMUSensorData * data )
     }
 
     memcpy ( &data->acc_x, dBuffer, sizeof ( float ) * 3 );
-    return 1;
+    return IMU_OK;
 }
 
 int icm20948_get_gyro_data ( IMUSensorData * data )
@@ -448,9 +441,9 @@ int icm20948_get_gyro_data ( IMUSensorData * data )
     IMUStatus status;
 
     status = icm20948_get_data ( 51, 6, rawData );
-    if(status != IMU_OK)
+    if ( status != IMU_OK )
     {
-        return status;
+        return IMU_ERR;
     }
 
     for ( int i = 0; i < 6; i = i + 2 )
@@ -460,7 +453,7 @@ int icm20948_get_gyro_data ( IMUSensorData * data )
     }
 
     memcpy ( &data->gyro_x, dBuffer, sizeof ( float ) * 3 );
-    return 1;
+    return IMU_OK;
 }
 
 
