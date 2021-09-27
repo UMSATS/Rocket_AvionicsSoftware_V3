@@ -20,8 +20,8 @@ I will draw the difference between Atollic Studio and CLion. Also, I will explai
 2. In the directory `C:\` create a new folder called `dev` and inside that create a folder called `opt` so you should have the directory `C:\dev\opt`.
 3. Install CLion into `C:\dev\opt\clion` and you should have no trouble setting up a free student version or free trial.
 4. Download OpenOCD from `https://gnutoolchains.com/arm-eabi/openocd/` and extract the openocd folder so you have the following path `C:\dev\opt\openocd`.
-5. Locate the `root` folder where you downloaded the flight software. (ex. `C:\Users\userx\Desktop\UMSATS_Code\Rocket_Avionics_V3\root`)
-6. Move the `root` folder to `C:\` so you should have `C:\root\usr\bin`.
+5. Locate the `root` folder on the drive `Shared drives -> ROCKETS -> Current Design Cycle -> AVIONICS -> Flight Computer -> Files`.
+6. Download, extract and move the `root` folder to `C:\` so you should have `C:\root\usr\bin`.
 7. Now that we have everything we need in place, we need environemnt variables so the executables can be seen system wide. In the Windows taskbar search for 
 **environement variables** and select **Edit the system environment variables**, and click **Environment Variables**.
 8. In the variable box under **User variables for userx** click **new** and for **Variable name:** put **ARM_DEV_ENV** and for **Variable value:** put 
