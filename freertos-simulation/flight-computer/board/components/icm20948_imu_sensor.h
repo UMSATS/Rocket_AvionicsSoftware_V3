@@ -1,5 +1,9 @@
-#ifndef SENSOR_AG_H
-#define SENSOR_AG_H
+//
+// Created by NicCa on 2021-08-06.
+//
+
+#ifndef AVIONICS_ICM20948_IMU_SENSOR_H
+#define AVIONICS_ICM20948_IMU_SENSOR_H
 
 #include <inttypes.h>
 #include <stdbool.h>
@@ -74,6 +78,4 @@ IMUSensorConfiguration imu_sensor_get_current_configuration();
 void imu_sensor_set_desired_processing_data_rate(uint32_t rate);
 
 
-
-
-#endif // SENSOR_AG_H
+#endif //AVIONICS_ICM20948_IMU_SENSOR_H

@@ -16,7 +16,7 @@
 
 #include <inttypes.h>
 
-#include "board/components/imu_sensor.h"
+#include "board/components/icm20948_imu_sensor.h"
 #include "board/components/pressure_sensor.h"
 
 

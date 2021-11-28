@@ -1,0 +1,17 @@
+bmi08g.c:159:8:bmi08g_init	24	static
+bmi08g.c:189:8:bmi08g_get_regs	32	static
+bmi08g.c:215:8:bmi08g_set_regs	32	static
+bmi08g.c:240:8:bmi08g_soft_reset	24	static
+bmi08g.c:267:8:bmi08g_get_meas_conf	24	static
+bmi08g.c:293:8:bmi08g_set_meas_conf	24	static
+bmi08g.c:355:8:bmi08g_get_power_mode	24	static
+bmi08g.c:377:8:bmi08g_set_power_mode	24	static
+bmi08g.c:430:8:bmi08g_get_data	32	static
+bmi08g.c:474:8:bmi08g_set_int_config	24	static
+bmi08g.c:504:8:bmi08g_perform_selftest	24	static
+bmi08g.c:564:15:null_ptr_check	24	static
+bmi08g.c:582:15:get_regs	40	static
+bmi08g.c:605:15:set_regs	40	static
+bmi08g.c:627:15:set_gyro_data_ready_int	24	static
+bmi08g.c:690:15:set_int_pin_config	24	static
+bmi08g.c:731:15:set_gyro_selftest	24	static

@@ -322,7 +322,7 @@ MemoryManagerStatus memory_manager_start ( )
         return MEM_ERR;
     }
 
-    if ( pdFALSE == xTaskCreate ( prvQueueMonitorTask, "mem-manager", configMINIMAL_STACK_SIZE, NULL, 5, &prvQueueMonitorTaskHandle ) )
+    if ( pdFALSE == xTaskCreate ( prvQueueMonitorTask, "mem-manager", configMINIMAL_STACK_SIZE, NULL, 6, &prvQueueMonitorTaskHandle ) )
     {
         return MEM_ERR;
     }
@@ -447,8 +447,7 @@ MemoryManagerStatus memory_manager_set_system_configurations ( FlightSystemConfi
     memset ( &prvGlobalConfigurationDiskSnapshot.values.system, 0, sizeof ( FlightSystemConfiguration ) );
     prvGlobalConfigurationDiskSnapshot.values.system = *systemConfiguration;
 
-    prvMemoryWriteAsyncGlobalConfigurationSector ( );
-    return MEM_OK;
+    return prvMemoryWriteAsyncGlobalConfigurationSector ( );
 }
 
 MemoryManagerStatus memory_manager_get_memory_configurations ( MemoryManagerConfiguration * memoryConfiguration )
@@ -1155,7 +1154,7 @@ MemoryManagerStatus memory_manager_get_single_data_entry ( MemorySector sector, 
         return MEM_ERR;
     }
 
-    return prvMemoryAccessSectorSingleDataEntry ( MemoryUserDataSectorFlightEvent, info, entry_index, dst );
+    return prvMemoryAccessSectorSingleDataEntry ( sector, info, entry_index, dst );
 }
 
 

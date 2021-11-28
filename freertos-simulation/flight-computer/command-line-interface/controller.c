@@ -15,6 +15,7 @@
 #include <FreeRTOS_CLI.h>
 #include "command-line-interface/tools/sysctl.h"
 #include "command-line-interface/tools/read.h"
+#include "command-line-interface/tools/save.h"
 #include "command-line-interface/tools/configure.h"
 #include "command-line-interface/tools/mem.h"
 
@@ -169,7 +170,7 @@ static const CLI_Command_Definition_t xSaveCommand =
         "\r\nsave:\r\n Saves all the configurations to the flight computer flash memory.\r\n"
         "Usage:\r\n "
         "NO ARGUMENTS ARE REQUIRED\n",
-        prvUsageCommand, /* The function to run. */
+        prvSaveCommand, /* The function to run. */
         0 /* No parameters are expected. */
 };
 
@@ -289,14 +290,15 @@ void prv_cli_function ( void * pvParams )
     {
         /* Process the input string received prior to the newline. */
 //        DISPLAY(">> ");
-        char * pData = NULL;
-        if ( UART_OK  != uart6_receive_command ( &pData ) )
+        char pData_start[cmdMAX_INPUT_SIZE];
+        char pData[cmdMAX_INPUT_SIZE];
+        if ( UART_OK  != uart6_receive_command ( (char *) pData ) )
         {
             DISPLAY ( "%s", "Error receiving user input command." );
             continue;
         }
 
-        memcpy ( cInputString, pData, strlen ( pData ) );
+        memcpy ( cInputString, &pData, strlen ( pData ) );
 
 //        memcpy(cInputString, commands[comm_index], strlen(commands[comm_index]));
 //        DISPLAY("cInputString");
@@ -331,7 +333,7 @@ void command_line_interface_start ( void * const pvParameters )
 {
     if ( !s_is_running )
     {
-        if ( pdFALSE == xTaskCreate ( prv_cli_function, "cli-manager", configMINIMAL_STACK_SIZE, NULL, 5, NULL ) )
+        if ( pdFALSE == xTaskCreate ( prv_cli_function, "cli-manager", configMINIMAL_STACK_SIZE, NULL, 10, NULL ) )
         {
             board_error_handler ( __FILE__, __LINE__ );
         }
@@ -457,6 +459,21 @@ static BaseType_t prvReadCommand ( char * pcWriteBuffer, size_t xWriteBufferLen,
 
     /* generate response */
     cli_tools_read ( pcWriteBuffer, xWriteBufferLen );
+
+    return pdFALSE;
+}
+
+static BaseType_t prvSaveCommand ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * pcCommandString )
+{
+    /* Remove compile time warnings about unused parameters, and check the
+   write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+   write buffer length is adequate, so does not check for buffer overflows. */
+    ( void ) xWriteBufferLen;
+    ( void ) pcCommandString;
+    configASSERT( pcWriteBuffer );
+
+    /* generate response */
+    cli_tools_save ( pcWriteBuffer, xWriteBufferLen );
 
     return pdFALSE;
 }

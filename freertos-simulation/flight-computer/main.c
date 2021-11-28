@@ -147,7 +147,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 #include "timers.h"
 
 
-#include "board/components/imu_sensor.h"
+#include "board/components/icm20948_imu_sensor.h"
 #include "board/components/pressure_sensor.h"
 #include "board/hardware_definitions.h"
 

@@ -1,0 +1,12 @@
+mem.c:33:6:cli_tools_mem	24	static
+mem.c:100:6:cli_tools_mem_read	296	static
+mem.c:143:6:cli_tools_mem_scan	40	static
+mem.c:157:6:cli_tools_mem_erase_data_section	304	static
+mem.c:215:6:cli_tools_mem_erase_config_section	32	static
+mem.c:230:6:cli_tools_mem_erase_all	32	static
+mem.c:246:13:cli_tools_mem_read_imu_index	96	static
+mem.c:273:13:cli_tools_mem_read_press_index	56	static
+mem.c:290:13:cli_tools_mem_read_cont_index	296	static
+mem.c:306:13:cli_tools_mem_read_flight_event_index	296	static
+mem.c:322:13:cli_tools_mem_read_configuration_index	464	static
+mem.c:441:13:cli_tools_mem_stats	32	static

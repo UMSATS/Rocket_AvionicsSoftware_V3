@@ -18,7 +18,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 // INCLUDES
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "board/components/imu_sensor.h"
+#include "board/components/icm20948_imu_sensor.h"
 #include "protocols/SPI.h"
 #include "cmsis_os.h"
 #include "utilities/common.h"
@@ -337,7 +337,7 @@ int8_t gyro_config(IMUSensorConfiguration * configParams)
 
 void delay_ms ( uint32_t period_ms )
 {
-    board_delay(period_ms);
+    HAL_Delay(period_ms);
 }
 
 

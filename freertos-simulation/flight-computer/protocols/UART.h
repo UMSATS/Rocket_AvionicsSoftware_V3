@@ -52,7 +52,7 @@ char PRINT_BUFFER[BUFFER_SIZE];
 
 
 int UART_Port2_init ( void );
-int uart2_receive_command ( char ** pData );
+int uart2_receive_command ( char * pData );
 int uart2_transmit ( char const * message );
 int uart2_transmit_bytes ( uint8_t * bytes, uint16_t numBytes );
 int uart2_transmit_line_debug ( char const * message );
@@ -64,7 +64,7 @@ int uart6_transmit_line ( char const * message );
 int uart6_transmit_line_debug ( char const * message );
 int uart6_transmit_bytes ( uint8_t * bytes, uint16_t numBytes );
 int uart6_transmit_debug ( char const * message );
-int uart6_receive_command ( char ** pData );
+int uart6_receive_command ( char * pData );
 
 int uart2_receive ( uint8_t * buf, size_t size );
 int uart6_receive ( uint8_t * buf, size_t size );

@@ -1,0 +1,20 @@
+C:\dev\opt\clion\bin\cmake\win\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/root/usr/bin/mingw32-make.exe -DCMAKE_C_COMPILER=C:/root/usr/bin/arm-atollic-eabi-gcc.exe -DCMAKE_CXX_COMPILER=C:/root/usr/bin/arm-atollic-eabi-g++.exe -G "CodeBlocks - MinGW Makefiles" C:\Users\NicCa\Desktop\UMSATS_Code\Rocket_AvionicsSoftware_V3\freertos-simulation\build-on-windows
+Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut from Settings > Manage App Execution Aliases.
+-- Selected ARM BUILD with ARM-Build tools
+CMake Deprecation Warning at C:/dev/opt/clion/bin/cmake/win/share/cmake-3.17/Modules/CMakeForceCompiler.cmake:75 (message):
+  The CMAKE_FORCE_C_COMPILER macro is deprecated.  Instead just set
+  CMAKE_C_COMPILER and allow CMake to identify the compiler.
+Call Stack (most recent call first):
+  CMakeLists.txt:103 (CMAKE_FORCE_C_COMPILER)
+
+
+CMake Deprecation Warning at C:/dev/opt/clion/bin/cmake/win/share/cmake-3.17/Modules/CMakeForceCompiler.cmake:89 (message):
+  The CMAKE_FORCE_CXX_COMPILER macro is deprecated.  Instead just set
+  CMAKE_CXX_COMPILER and allow CMake to identify the compiler.
+Call Stack (most recent call first):
+  CMakeLists.txt:104 (CMAKE_FORCE_CXX_COMPILER)
+
+
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env

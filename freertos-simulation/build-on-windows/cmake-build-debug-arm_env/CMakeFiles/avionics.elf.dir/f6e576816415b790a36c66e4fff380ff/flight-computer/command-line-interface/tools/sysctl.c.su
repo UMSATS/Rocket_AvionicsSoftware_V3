@@ -1,0 +1,5 @@
+sysctl.c:28:6:cli_tools_sysctl	24	static
+sysctl.c:61:13:cli_tools_sysctl_fl	32	static
+sysctl.c:101:13:cli_tools_sysctl_imu	32	static
+sysctl.c:141:13:cli_tools_sysctl_press	32	static
+sysctl.c:182:13:cli_tools_sysctl_df	32	static

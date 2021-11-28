@@ -9,7 +9,7 @@
 #include "event-detection/event_detector.h"
 #include "configurations/UserConfig.h"
 
-#include "board/components/imu_sensor.h"
+#include "board/components/icm20948_imu_sensor.h"
 #include "board/components/pressure_sensor.h"
 #include "utilities/common.h"
 

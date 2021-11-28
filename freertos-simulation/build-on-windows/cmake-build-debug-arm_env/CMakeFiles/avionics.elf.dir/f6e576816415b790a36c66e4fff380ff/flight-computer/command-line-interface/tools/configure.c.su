@@ -1,0 +1,11 @@
+configure.c:35:6:cli_tools_configure	24	static
+configure.c:202:6:cli_tools_configure_set_accel_bw	96	static
+configure.c:249:6:cli_tools_configure_set_accel_range	32	static
+configure.c:286:6:cli_tools_configure_set_accel_odr	32	static
+configure.c:347:6:cli_tools_configure_set_gyro_bw	48	static
+configure.c:416:6:cli_tools_configure_set_gyro_range	32	static
+configure.c:461:6:cli_tools_configure_set_press_odr	48	static
+configure.c:510:6:cli_tools_configure_set_press_os	48	static
+configure.c:559:6:cli_tools_configure_set_temp_os	48	static
+configure.c:608:6:cli_tools_configure_set_press_iir_coeff	48	static
+configure.c:670:6:cli_tools_configure_show	48	static

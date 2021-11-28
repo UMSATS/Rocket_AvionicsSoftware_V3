@@ -54,7 +54,6 @@ IF(BUILD_FOR_SIM_ON_UNIX_OS)
 
     SET(SIM_PORT_SRC        # sensor simulation
             ../flight-computer/sim-port/sensor-simulation/buzzer.c
-            ../flight-computer/sim-port/sensor-simulation/imu_sensor.c
             ../flight-computer/sim-port/sensor-simulation/pressure_sensor.c
             ../flight-computer/sim-port/sensor-simulation/datafeeder.cpp
 
@@ -166,7 +165,6 @@ ELSE()
 
             # sensors
             ../flight-computer/board/components/impl/buzzer.c
-            ../flight-computer/board/components/impl/imu_sensor.c
             ../flight-computer/board/components/impl/pressure_sensor.c
             )
 ENDIF()

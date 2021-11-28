@@ -1,0 +1,7 @@
+bmi088.c:93:8:bmi088_init	24	static
+bmi088.c:110:8:bmi088_apply_config_file	24	static
+bmi088.c:130:8:bmi088_configure_data_synchronization	24	static
+bmi088.c:182:8:bmi088_configure_anymotion	40	static
+bmi088.c:212:8:bmi088_get_synchronized_data	40	static
+bmi088.c:264:8:bmi088_set_data_sync_int_config	24	static
+bmi088.c:293:15:null_ptr_check	24	static

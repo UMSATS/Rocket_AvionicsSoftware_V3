@@ -1,0 +1,7 @@
+board.c:8:13:board_init	16	static
+board.c:29:6:board_delay	16	static
+board.c:41:6:board_led_blink	16	static
+board.c:48:13:system_clock_config	88	static
+board.c:91:6:GPIO_init	56	static
+board.c:114:6:board_error_handler	16	static
+board.c:133:6:HAL_TIM_PeriodElapsedCallback	16	static

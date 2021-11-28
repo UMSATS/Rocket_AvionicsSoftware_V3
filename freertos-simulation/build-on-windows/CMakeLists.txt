@@ -63,7 +63,6 @@ IF(BUILD_FOR_SIM_ON_WIN_OS)
 
     SET(SIM_PORT_SRC        # sensor simulation
             ../flight-computer/sim-port/sensor-simulation/buzzer.c
-            ../flight-computer/sim-port/sensor-simulation/imu_sensor.c
             ../flight-computer/sim-port/sensor-simulation/pressure_sensor.c
             ../flight-computer/sim-port/sensor-simulation/flash.c
             ../flight-computer/sim-port/sensor-simulation/datafeeder.cpp
@@ -166,7 +165,7 @@ ELSE()
             ../flight-computer/protocols/impl/SPI.c
 
             # sensors
-            ../flight-computer/board/components/impl/imu_sensor.c
+            ../flight-computer/board/components/impl/icm20948_imu_sensor.c
             ../flight-computer/board/components/impl/pressure_sensor.c
             ../flight-computer/board/components/impl/buzzer.c
             ../flight-computer/board/components/flash.c
@@ -200,6 +199,7 @@ SET(USER_SRC                # Board
         # CLI
         ../flight-computer/command-line-interface/controller.c
         ../flight-computer/command-line-interface/tools/read.c
+        ../flight-computer/command-line-interface/tools/save.c
         ../flight-computer/command-line-interface/tools/configure.c
         ../flight-computer/command-line-interface/tools/mem.c
         ../flight-computer/command-line-interface/tools/sysctl.c

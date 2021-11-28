@@ -170,7 +170,7 @@ static int uart_transmit_bytes ( UART_HandleTypeDef * huart, uint8_t * bytes, ui
     return UART_OK;
 }
 
-static int uart_receive_command ( UART_HandleTypeDef * huart, const char * pToData )
+static int uart_receive_command ( UART_HandleTypeDef * huart, char * pToData )
 {
     uint8_t c; //key pressed character
     size_t  i;
@@ -211,7 +211,7 @@ static int uart_receive_command ( UART_HandleTypeDef * huart, const char * pToDa
             }
             else
             { //add character to end of receive buffer
-                prvBuffrx[ i++ ] = c;
+                pToData[ i++ ] = c;
             }
 
         }
@@ -224,9 +224,9 @@ static int uart_receive_command ( UART_HandleTypeDef * huart, const char * pToDa
         return UART_ERR;
     }
 
-    prvBuffrx[ i ] = '\0'; //string terminator added to the end of the message
+    pToData[ i ] = '\0'; //string terminator added to the end of the message
 
-    pToData = ( char * )  prvBufftx;
+    //pToData = ( char * )  prvBuffrx;
 
     return UART_OK;
 }
@@ -277,7 +277,7 @@ int uart2_transmit_bytes ( uint8_t * bytes, uint16_t numBytes )
     return uart_transmit_bytes ( &uart2, bytes, numBytes );
 }
 
-int uart2_receive_command ( const char * pData )
+int uart2_receive_command ( char * pData )
 {
     return uart_receive_command ( &uart2, pData );
 }
@@ -302,7 +302,7 @@ int uart6_transmit_bytes ( uint8_t * bytes, uint16_t numBytes )
     return uart_transmit_bytes ( &uart6, bytes, numBytes );
 }
 
-int uart6_receive_command ( const char * pData )
+int uart6_receive_command ( char * pData )
 {
     return uart_receive_command ( &uart6, pData );
 }

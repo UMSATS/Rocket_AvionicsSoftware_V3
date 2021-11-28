@@ -1,0 +1,16 @@
+flight_controller.c:41:24:flight_controller_init	16	static
+flight_controller.c:50:24:flight_controller_start	16	static
+flight_controller.c:72:6:flight_controller_stop	4	static
+flight_controller.c:79:13:prv_flight_controller_task	56	static
+flight_controller.c:293:13:get_sensor_data_update	56	static
+flight_controller.c:321:6:prvCheckRecoveryStatusAndNotifyIfChanged	24	static
+flight_controller.c:377:24:flight_state_machine_init	16	static
+flight_controller.c:388:24:flight_state_machine_tick	32	static
+flight_controller.c:414:5:sm_STATE_LAUNCHPAD	16	static
+flight_controller.c:419:5:sm_STATE_PRE_APOGEE	16	static
+flight_controller.c:426:5:sm_STATE_APOGEE	16	static
+flight_controller.c:437:5:sm_STATE_POST_APOGEE	16	static
+flight_controller.c:443:5:sm_STATE_MAIN_CHUTE	16	static
+flight_controller.c:453:5:sm_STATE_POST_MAIN	16	static
+flight_controller.c:460:5:sm_STATE_LANDED	16	static
+flight_controller.c:467:5:sm_STATE_EXIT	16	static
