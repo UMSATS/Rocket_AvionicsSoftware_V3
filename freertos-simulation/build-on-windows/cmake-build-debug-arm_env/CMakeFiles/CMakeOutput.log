@@ -1,8 +1,0 @@
-The target system is: Generic - 1 - 
-The host system is: Windows - 10.0.19042 - AMD64
-Checking whether the ASM compiler is GNU using "--version" matched "(GNU assembler)|(GCC)|(Free Software Foundation)":
-arm-atollic-eabi-gcc.exe (GNU Tools for ARM Embedded Processors (Build 17.03)) 6.3.1 20170215 (release) [ARM/embedded-6-branch revision 245512]
-Copyright (C) 2016 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-

@@ -1,7 +1,0 @@
-interrupt_handlers.c:30:6:NMI_Handler	4	static
-interrupt_handlers.c:43:6:HardFault_Handler	16	static
-interrupt_handlers.c:77:6:MemManage_Handler	8	static
-interrupt_handlers.c:94:6:BusFault_Handler	8	static
-interrupt_handlers.c:111:6:UsageFault_Handler	16	static
-interrupt_handlers.c:145:6:DebugMon_Handler	4	static
-interrupt_handlers.c:165:6:TIM1_UP_TIM10_IRQHandler	8	static

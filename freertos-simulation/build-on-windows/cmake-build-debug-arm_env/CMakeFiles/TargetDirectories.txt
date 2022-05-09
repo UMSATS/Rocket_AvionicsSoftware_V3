@@ -1,6 +1,0 @@
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/CMSIS_LIB.dir
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/rebuild_cache.dir
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/RTOS_LIB.dir
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/avionics.elf.dir
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/upload.dir
-C:/Users/NicCa/Desktop/UMSATS_Code/Rocket_AvionicsSoftware_V3/freertos-simulation/build-on-windows/cmake-build-debug-arm_env/CMakeFiles/edit_cache.dir

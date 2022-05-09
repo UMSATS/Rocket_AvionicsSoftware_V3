@@ -1,5 +1,0 @@
-recovery.c:22:6:recovery_init	80	static
-recovery.c:64:6:recoveryEnableMOSFET	16	static
-recovery.c:79:6:recoveryActivateMOSFET	16	static
-recovery.c:122:26:recoveryCheckContinuity	24	static
-recovery.c:150:27:recoveryCheckOverCurrent	24	static
