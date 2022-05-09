@@ -20,16 +20,6 @@
   * @param  htim : TIM handle
   * @retval None
   */
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-//{
-//  /* USER CODE BEGIN Callback 0 */
-//
-//  /* USER CODE END Callback 0 */
-//  if (htim->Instance == TIM1) {
-//    HAL_IncTick();
-//  }
-//
-//}
 
 
 #ifdef  USE_FULL_ASSERT
@@ -50,26 +40,6 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -156,9 +126,112 @@ void assert_failed(uint8_t *file, uint32_t line)
 #include "stm32f4xx_hal_uart.h"
 #endif
 
+#if (SW_UNIT_TEST_MODE_ON == 1)
+#include "board/components/icm20948_imu_sensor.h"
+#include "board/components/pressure_sensor.h"
+#include "board/components/flash.h"
+#endif
+
 /*** SEE THE COMMENTS AT THE TOP OF THIS FILE ***/
 int main( void )
 {
+    if (SW_UNIT_TEST_MODE_ON){
+
+        if ( board_init( ) != BOARD_OK )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        }
+
+        if ( UART_OK != UART_Port6_init() )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "UMSATS ROCKETRY FLIGHT COMPUTER");
+        }
+
+        if ( FLASH_OK != flash_init ( ) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "Flash ID read successful");
+        }
+
+        if ( MEM_OK != memory_manager_init ( ) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "Memory Manager has been initialized and configured!");
+        }
+
+        buzzer_init( );
+        buzz_delay(500);
+        DEBUG_LINE( "Buzzer has been set up.");
+
+        recovery_init( );
+        DEBUG_LINE( "Recovery GPIO pins have been set up.");
+
+        if ( PRESS_SENSOR_OK != pressure_sensor_init( NULL ) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "Pressure sensor has been set up.");
+        }
+
+        if ( IMU_OK != imu_sensor_init( NULL ) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "IMU sensor has been set up.");
+        }
+
+        if ( FLIGHT_CONTROLLER_OK != flight_controller_init(NULL) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "Flight controller has been set up.");
+        }
+
+        if ( ! memory_manager_start ( NULL ) )
+        {
+            board_error_handler( __FILE__, __LINE__ );
+        } else
+        {
+            DEBUG_LINE( "Memory Manager has been started.");
+        }
+
+        flight_controller_start ( NULL );
+
+        static FlightSystemConfiguration system_configurations   = {0};
+        static MemoryManagerConfiguration memoryConfigurations   = {0};
+        flight_sensor_setup(&system_configurations, &memoryConfigurations);
+
+        while (1){
+
+            //Pressure sensor software unit test
+            #if (pressTemp_SW_UNIT_TEST)
+                pressure_sensor_test();
+            #endif
+
+            //IMU sensor software unit test
+            #if (imu_SW_UNIT_TEST)
+                imu_sensor_test();
+            #endif
+
+            //Flash sensor software unit test
+            #if (flash_SW_UNIT_TEST)
+                flash_test();
+            #endif
+
+            board_delay(250);
+        }
+    }
+
     if ( board_init( ) != BOARD_OK )
     {
         board_error_handler( __FILE__, __LINE__ );
@@ -236,28 +309,6 @@ int main( void )
 /*-----------------------------------------------------------*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #if (userconf_FLASH_DISK_SIMULATION_ON == 1)
 
 /* Standard includes. */
@@ -325,18 +376,6 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
 void vApplicationTickHook( void );
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

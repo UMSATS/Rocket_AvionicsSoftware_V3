@@ -57,7 +57,6 @@ void recovery_init ( )
     GPIO_InitStruct3.Mode = GPIO_MODE_INPUT;
     HAL_GPIO_Init ( RECOV_MAIN_CONTINUITY_PORT, &GPIO_InitStruct3 );
 
-
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -68,7 +67,7 @@ void recoveryEnableMOSFET ( RecoverySelect recoverySelect )
         //Active low.
         HAL_GPIO_WritePin ( RECOV_MAIN_ENABLE_PORT, RECOV_MAIN_ENABLE_PIN, GPIO_PIN_RESET );
     }
-    else if ( recoverySelect == RecoverSelectDrogueParachute )
+    else if ( recoverySelect == RecoverySelectDrogueParachute )
     {
         //Active low.
         HAL_GPIO_WritePin ( RECOV_DROGUE_ENABLE_PORT, RECOV_DROGUE_ENABLE_PIN, GPIO_PIN_RESET );
@@ -87,9 +86,7 @@ void recoveryActivateMOSFET ( RecoverySelect recoverySelect )
 
         //Active high.
         HAL_GPIO_WritePin ( RECOV_MAIN_ACTIVATE_PORT, RECOV_MAIN_ACTIVATE_PIN, GPIO_PIN_SET );
-
-        // TODO: what is this ????
-        // vTaskDelay ( EMATCH_ON_TIME );
+        vTaskDelay(pdMS_TO_TICKS(500));
 
         //De-activate.
         HAL_GPIO_WritePin ( RECOV_MAIN_ACTIVATE_PORT, RECOV_MAIN_ACTIVATE_PIN, GPIO_PIN_RESET );
@@ -97,7 +94,7 @@ void recoveryActivateMOSFET ( RecoverySelect recoverySelect )
         //Disable driver.
         HAL_GPIO_WritePin ( RECOV_MAIN_ENABLE_PORT, RECOV_MAIN_ENABLE_PIN, GPIO_PIN_SET );
     }
-    else if ( recoverySelect == RecoverSelectDrogueParachute )
+    else if ( recoverySelect == RecoverySelectDrogueParachute )
     {
 
         //Write pin low in case there was a fault.
@@ -105,8 +102,7 @@ void recoveryActivateMOSFET ( RecoverySelect recoverySelect )
 
         //Active high.
         HAL_GPIO_WritePin ( RECOV_DROGUE_ACTIVATE_PORT, RECOV_DROGUE_ACTIVATE_PIN, GPIO_PIN_SET );
-
-        vTaskDelay ( pdMS_TO_TICKS( EMATCH_ON_TIME ) );
+        vTaskDelay(pdMS_TO_TICKS(500));
 
         //De-activate.
         HAL_GPIO_WritePin ( RECOV_DROGUE_ACTIVATE_PORT, RECOV_DROGUE_ACTIVATE_PIN, GPIO_PIN_RESET );
@@ -129,7 +125,7 @@ RecoveryContinuityStatus recoveryCheckContinuity ( RecoverySelect recoverySelect
     {
         result = HAL_GPIO_ReadPin ( RECOV_MAIN_CONTINUITY_PORT, RECOV_MAIN_CONTINUITY_PIN );
     }
-    else if ( recoverySelect == RecoverSelectDrogueParachute )
+    else if ( recoverySelect == RecoverySelectDrogueParachute )
     {
         result = HAL_GPIO_ReadPin ( RECOV_DROGUE_CONTINUITY_PORT, RECOV_DROGUE_CONTINUITY_PIN );
     }
@@ -157,7 +153,7 @@ RecoveryOverCurrentStatus recoveryCheckOverCurrent ( RecoverySelect recoverySele
     {
         result = HAL_GPIO_ReadPin ( RECOV_MAIN_OVERCURRENT_PORT, RECOV_MAIN_OVERCURRENT_PIN );
     }
-    else if ( recoverySelect == RecoverSelectDrogueParachute )
+    else if ( recoverySelect == RecoverySelectDrogueParachute )
     {
         result = HAL_GPIO_ReadPin ( RECOV_DROGUE_OVERCURRENT_PORT, RECOV_DROGUE_OVERCURRENT_PIN );
     }

@@ -74,19 +74,11 @@ void flight_controller_stop()
     prvTaskState.isRunning = 0;
 }
 
-
-
-static void prv_flight_controller_task(void * pvParams)
+void flight_sensor_setup(FlightSystemConfiguration *system_configurations, MemoryManagerConfiguration *memoryConfigurations)
 {
-    (void) pvParams;
-
-    static FlightSystemConfiguration system_configurations   = {0};
-    static MemoryManagerConfiguration memoryConfigurations   = {0};
-
-    prvTaskState.isRunning = 1;
 
     //------------------------------ EDIT SYSTEM CONFIGURATIONS ------------------------------------------------------//
-    if ( memory_manager_get_system_configurations ( &system_configurations ) != MEM_OK )
+    if ( memory_manager_get_system_configurations ( system_configurations ) != MEM_OK )
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -102,7 +94,7 @@ static void prv_flight_controller_task(void * pvParams)
 
 
     //------------------------------ EDIT MEMORY CONFIGURATIONS ------------------------------------------------------//
-    if ( memory_manager_get_memory_configurations ( &memoryConfigurations ) != MEM_OK)
+    if ( memory_manager_get_memory_configurations ( memoryConfigurations ) != MEM_OK)
     {
         board_error_handler( __FILE__, __LINE__ );
     } else
@@ -177,10 +169,10 @@ static void prv_flight_controller_task(void * pvParams)
          pressure_sensor_start ( NULL );
     #endif
 #else
-    system_configurations.imu_data_needs_to_be_converted       = 1;
-    system_configurations.pressure_data_needs_to_be_converted  = 1;
+    system_configurations->imu_data_needs_to_be_converted       = 1;
+    system_configurations->pressure_data_needs_to_be_converted  = 1;
 
-    if(IMU_OK != imu_sensor_configure(&system_configurations.imu_sensor_configuration))
+    if(IMU_OK != imu_sensor_configure(&system_configurations->imu_sensor_configuration))
     {
         board_error_handler( __FILE__, __LINE__ );
     }
@@ -189,7 +181,7 @@ static void prv_flight_controller_task(void * pvParams)
         DEBUG_LINE( "IMU sensor has been configured.");
     }
 
-    if(PRESS_SENSOR_OK != pressure_sensor_configure(&system_configurations.pressure_sensor_configuration))
+    if(PRESS_SENSOR_OK != pressure_sensor_configure(&system_configurations->pressure_sensor_configuration))
     {
         board_error_handler( __FILE__, __LINE__ );
     }
@@ -198,9 +190,21 @@ static void prv_flight_controller_task(void * pvParams)
         DEBUG_LINE( "Pressure sensor has been configured.");
     }
 
+#endif
+}
+
+static void prv_flight_controller_task(void * pvParams)
+{
+    (void) pvParams;
+
+    static FlightSystemConfiguration system_configurations   = {0};
+    static MemoryManagerConfiguration memoryConfigurations   = {0};
+
+    prvTaskState.isRunning = 1;
+
+    flight_sensor_setup(&system_configurations, &memoryConfigurations);
     imu_sensor_start      ( &system_configurations );
     pressure_sensor_start ( &system_configurations );
-#endif
 
     if ( event_detector_init ( &system_configurations ) != EVENT_DETECTOR_OK )
     {
@@ -279,9 +283,9 @@ static void prv_flight_controller_task(void * pvParams)
         if ( ( xTaskGetTickCount ( ) - last_time ) / configTICK_RATE_HZ >= 1 )
         {
             seconds++;
-//            DEBUG_LINE( "Flight Time: %d sec", seconds);
+            DEBUG_LINE( "Flight Time: %d sec", seconds);
             last_time = ( xTaskGetTickCount ( ) - start_time );
-//            DEBUG_LINE ( "CURRENT ALTITUDE : %f", event_detector_current_altitude ( ) );
+            DEBUG_LINE ( "CURRENT ALTITUDE : %f", event_detector_current_altitude ( ) );
         }
     }
 
@@ -320,7 +324,7 @@ static void get_sensor_data_update ( DataContainer * data )
 
 void prvCheckRecoveryStatusAndNotifyIfChanged ( DataContainer * data )
 {
-    for ( RecoverySelect recovery = RecoverSelectDrogueParachute; recovery < RecoverySelectCount; recovery++ )
+    for ( RecoverySelect recovery = RecoverySelectDrogueParachute; recovery < RecoverySelectCount; recovery++ )
     {
         RecoveryContinuityStatus currentContinuityStatus = recoveryCheckContinuity  ( recovery );
 
@@ -425,8 +429,8 @@ int sm_STATE_PRE_APOGEE ( DataContainer * data )
 
 int sm_STATE_APOGEE ( DataContainer * data )
 {
-    recoveryEnableMOSFET ( RecoverSelectDrogueParachute );
-    recoveryActivateMOSFET ( RecoverSelectDrogueParachute );
+    recoveryEnableMOSFET ( RecoverySelectDrogueParachute );
+    recoveryActivateMOSFET ( RecoverySelectDrogueParachute );
 
 
     prvCheckRecoveryStatusAndNotifyIfChanged ( data );

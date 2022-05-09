@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "protocols/UART.h"
 
+#define IMU_STR_VAL_LENGTH 6
 
 typedef struct imu_sensor_configuration
 {
@@ -62,7 +63,7 @@ typedef union
 
 
 
-int  imu_sensor_test           ();
+bool imu_sensor_test           ();
 int  imu_sensor_init           ();
 int  imu_sensor_configure      ( IMUSensorConfiguration * parameters );
 int  imu_sensor_start          ( void * const param );

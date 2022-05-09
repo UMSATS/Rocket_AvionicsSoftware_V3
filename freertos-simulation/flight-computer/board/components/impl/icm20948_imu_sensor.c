@@ -24,6 +24,7 @@
 #include "utilities/common.h"
 #include "math.h"
 #include "board/hardware_definitions.h"
+#include <stdio.h>
 
 #define INTERNAL_ERROR -127
 #define ACC_TYPE                                        (uint8_t) 0x140000
@@ -258,7 +259,7 @@ static void prv_imu_sensor_controller_task(void * pvParams)
 
 int imu_sensor_start(void * const param)
 {
-    DISPLAY_LINE( "[INFO]: IMU sensor task has been started");
+    DEBUG_LINE( "[INFO]: IMU sensor task has been started");
 
     //Get the parameters.
     if ( !prvController.isInitialized )
@@ -358,7 +359,7 @@ void imu_sensor_set_desired_processing_data_rate(uint32_t rate)
 
 bool imu_add_measurement (IMUSensorData * _data)
 {
-    return pdTRUE == xQueueSend(s_queue, _data,0);
+    return pdTRUE == xQueueSend(s_queue, (void *) _data,0);
 }
 
 
@@ -463,4 +464,39 @@ int select_active_bank ( int bank )
     dataOut[0] = bank << 4;
 
     return icm20948_set_data (127, 1, dataOut );
+}
+
+bool imu_sensor_test ()
+{
+    int8_t result_flag;
+    IMUSensorData dataStruct = {};
+
+    result_flag = icm20948_get_accel_data (&dataStruct);
+    if(IMU_OK != result_flag)
+    {
+        DISPLAY_LINE( "[ERROR]: IMU sensor acquisition failed \r\n");
+        return false;
+    }
+
+    result_flag = icm20948_get_gyro_data (&dataStruct);
+    if(IMU_OK != result_flag)
+    {
+        DISPLAY_LINE( "[ERROR]: IMU sensor acquisition failed \r\n");
+        return false;
+    }
+
+    char bufx[IMU_STR_VAL_LENGTH+1];
+    char bufy[IMU_STR_VAL_LENGTH+1];
+    char bufz[IMU_STR_VAL_LENGTH+1];
+    gcvt(dataStruct.acc_x, IMU_STR_VAL_LENGTH, bufx);
+    gcvt(dataStruct.acc_y, IMU_STR_VAL_LENGTH, bufy);
+    gcvt(dataStruct.acc_z, IMU_STR_VAL_LENGTH, bufz);
+    DISPLAY_LINE( "[SUCCESS]: Accel value (x,y,z): (%s, %s, %s) \r\n", bufx, bufy, bufz);
+    gcvt(dataStruct.gyro_x, IMU_STR_VAL_LENGTH, bufx);
+    gcvt(dataStruct.gyro_y, IMU_STR_VAL_LENGTH, bufy);
+    gcvt(dataStruct.gyro_z, IMU_STR_VAL_LENGTH, bufz);
+    DISPLAY_LINE( "[SUCCESS]: Gyro value (x,y,z): (%s, %s, %s) \r\n", bufx, bufy, bufz);
+
+    return true;
+
 }

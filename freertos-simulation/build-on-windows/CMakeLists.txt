@@ -203,6 +203,7 @@ SET(USER_SRC                # Board
         ../flight-computer/command-line-interface/tools/configure.c
         ../flight-computer/command-line-interface/tools/mem.c
         ../flight-computer/command-line-interface/tools/sysctl.c
+        ../flight-computer/command-line-interface/tools/e-match.c
 
         ../flight-computer/core/system_configuration.c)
 

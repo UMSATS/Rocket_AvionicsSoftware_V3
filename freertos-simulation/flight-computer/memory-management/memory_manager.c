@@ -74,7 +74,7 @@
 // define the basic information about the metadata sector
 #define RESERVED_SECTORS_BASE_ADDRESS                   0
 #define RESERVED_SECTORS_COUNT                          2
-#define RESERVED_SECTOR_SUB_SIZE                        FLASH_4KB_SUBSECTOR_SIZE // or 16 pages
+#define RESERVED_SECTOR_SUB_SIZE                        FLASH_4KB_SECTOR_SIZE // or 16 pages
 
 // define the basic information about the global configuration sector
 #define GLOBAL_CONFIGURATION_SECTOR_BASE                RESERVED_SECTORS_BASE_ADDRESS
@@ -241,7 +241,7 @@ MemoryManagerStatus memory_manager_init ( ) /* noexcept */
     }
 
     // important part of initialization is the buffer queue that will hold a page of information to be written to the flash memory
-//    buffer_queue_init ( &prvPageBuffer );
+    //buffer_queue_init ( &prvPageBuffer );
 
     bool isIntegrityOK = false;
 
@@ -304,6 +304,7 @@ MemoryManagerStatus memory_manager_init ( ) /* noexcept */
 
         // storing the signature number
         memcpy ( prvMemoryMetaDataFlashSnapshot.values.signature, MEMORY_MANAGER_DATA_INTEGRITY_SIGNATURE, MEMORY_MANAGER_DATA_INTEGRITY_SIGNATURE_BUFFER_LENGTH );
+        prvMemoryWriteAsyncGlobalConfigurationSector();
     }
 
     xPageQueue = xQueueCreate ( 10, sizeof ( page_buffer_item ) );
@@ -322,7 +323,7 @@ MemoryManagerStatus memory_manager_start ( )
         return MEM_ERR;
     }
 
-    if ( pdFALSE == xTaskCreate ( prvQueueMonitorTask, "mem-manager", configMINIMAL_STACK_SIZE, NULL, 6, &prvQueueMonitorTaskHandle ) )
+    if ( pdFALSE == xTaskCreate ( prvQueueMonitorTask, "mem-manager", configMINIMAL_STACK_SIZE, NULL, 5, &prvQueueMonitorTaskHandle ) )
     {
         return MEM_ERR;
     }
@@ -614,7 +615,7 @@ MemoryManagerStatus prvMemoryWriteAsyncMetaDataSector ( )
     item.type = MemorySystemSectorUserDataSectorMetaData;
     memmove ( item.data, prvMemoryMetaDataFlashSnapshot.bytes, prvMemorySectorGetDataStructSize ( MemorySystemSectorUserDataSectorMetaData ) );
 
-    return pdPASS == xQueueSend ( xPageQueue, &item, 0 ) ? MEM_OK : MEM_ERR;
+    return pdPASS == xQueueSend ( xPageQueue, (void *) &item, 0 ) ? MEM_OK : MEM_ERR;
 }
 
 static MemoryManagerStatus prvMemoryWriteAsyncGlobalConfigurationSector ( )
@@ -628,7 +629,7 @@ static MemoryManagerStatus prvMemoryWriteAsyncGlobalConfigurationSector ( )
     item.type = MemorySystemSectorGlobalConfigurationData;
     memmove ( item.data, prvGlobalConfigurationDiskSnapshot.bytes, prvMemorySectorGetDataStructSize ( MemorySystemSectorGlobalConfigurationData ) );
 
-    return pdPASS == xQueueSend ( xPageQueue, &item, 0 ) ? MEM_OK : MEM_ERR;
+    return pdPASS == xQueueSend ( xPageQueue, (void *) &item, 0 ) ? MEM_OK : MEM_ERR;
 }
 
 static MemoryManagerStatus  prvMemoryAsyncWriteAnyMemorySectorIfAvailable ( )
@@ -643,7 +644,7 @@ static MemoryManagerStatus  prvMemoryAsyncWriteAnyMemorySectorIfAvailable ( )
             item.type = toMemorySector ( sector ) ;
             memcpy ( item.data, prvCurrentMemoryUserDataSectorRAMBuffers[ sector ].read->data, PAGE_SIZE ) ;
 
-            if ( pdPASS != xQueueSend ( xPageQueue, &item, 0 ) )
+            if ( pdPASS != xQueueSend ( xPageQueue, (void *) &item, 0 ) )
             {
                 return MEM_ERR;
             }
@@ -820,7 +821,7 @@ void prvQueueMonitorTask ( void * arg )
                 // it is a system sector
 
 //                DEBUG_LINE( "SystemSector: %i was flushed!",  toSystemSector ( item.type ) );
-                status = prvMemorySystemSectorWritePageNow ( item.type, item.data );
+                status = prvMemorySystemSectorWritePageNow ( item.type, &item.data[0] );
             }
             else
             {
