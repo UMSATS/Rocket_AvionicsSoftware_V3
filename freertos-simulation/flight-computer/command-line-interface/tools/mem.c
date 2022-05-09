@@ -16,6 +16,7 @@
 #include "memory-management/memory_manager.h"
 
 
+
 static bool cli_tools_mem_read                           (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
 static bool cli_tools_mem_scan                           (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
 static bool cli_tools_mem_erase_data_section             (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
@@ -326,27 +327,28 @@ static bool cli_tools_mem_read_configuration_index ( char * pcWriteBuffer, size_
     GlobalConfigurationU dst = { };
     if ( MEM_OK == memory_manager_get_single_data_entry ( MemorySystemSectorGlobalConfigurationData, &dst, value ) )
     {
+
         snprintf(pcWriteBuffer, xWriteBufferLen,
-        "[%s]:\r\n"
-        "signature = %s\r\n"
-        "\r\n"
-        "Memory:\r\n"
-        " write_drogue_continuity_ms      = %i\r\n"
-        " write_pre_launch_multiplier     = %i\r\n"
-        " write_pre_apogee_multiplier     = %i\r\n"
-        " write_post_apogee_multiplier    = %i\r\n"
-        " write_ground_multiplier         = %i\r\n"
-        " write_interval_accelerometer_ms = %i\r\n"
-        " write_interval_gyroscope_ms     = %i\r\n"
-        " write_interval_magnetometer_ms  = %i\r\n"
-        " write_interval_pressure_ms      = %i\r\n"
-        " write_interval_altitude_ms      = %i\r\n"
-        " write_interval_temperature_ms   = %i\r\n"
-        " write_interval_flight_state_ms  = %i\r\n"
-        " write_drogue_continuity_ms      = %i\r\n"
-        " write_main_continuity_ms        = %i\r\n"
-        "\r\n"
-        "System:\r\n"
+         "[%s]:\r\n"
+         "signature = %s\r\n"
+         "\r\n"
+         "Memory:\r\n"
+         " write_drogue_continuity_ms      = %i\r\n"
+         " write_pre_launch_multiplier     = %i\r\n"
+         " write_pre_apogee_multiplier     = %i\r\n"
+         " write_post_apogee_multiplier    = %i\r\n"
+         " write_ground_multiplier         = %i\r\n"
+         " write_interval_accelerometer_ms = %i\r\n"
+         " write_interval_gyroscope_ms     = %i\r\n"
+         " write_interval_magnetometer_ms  = %i\r\n"
+         " write_interval_pressure_ms      = %i\r\n"
+         " write_interval_altitude_ms      = %i\r\n"
+         " write_interval_temperature_ms   = %i\r\n"
+         " write_interval_flight_state_ms  = %i\r\n"
+         " write_drogue_continuity_ms      = %i\r\n"
+         " write_main_continuity_ms        = %i\r\n"
+         "\r\n "
+         "System:\r\n"
         " landing_rotation_speed_deg_per_sec      = %lu\r\n"
         " backup_time_launch_to_apogee_sec        = %lu\r\n"
         " backup_time_apogee_to_main_sec          = %lu\r\n"
@@ -426,6 +428,7 @@ static bool cli_tools_mem_read_configuration_index ( char * pcWriteBuffer, size_
         dst.values.system.pressure_sensor_configuration.pressure_oversampling,
         dst.values.system.pressure_sensor_configuration.infinite_impulse_response_filter_coefficient
         );
+
 
         return true;
     }

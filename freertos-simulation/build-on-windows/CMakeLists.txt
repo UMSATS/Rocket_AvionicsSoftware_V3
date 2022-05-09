@@ -63,7 +63,6 @@ IF(BUILD_FOR_SIM_ON_WIN_OS)
 
     SET(SIM_PORT_SRC        # sensor simulation
             ../flight-computer/sim-port/sensor-simulation/buzzer.c
-            ../flight-computer/sim-port/sensor-simulation/imu_sensor.c
             ../flight-computer/sim-port/sensor-simulation/pressure_sensor.c
             ../flight-computer/sim-port/sensor-simulation/flash.c
             ../flight-computer/sim-port/sensor-simulation/datafeeder.cpp
@@ -166,7 +165,7 @@ ELSE()
             ../flight-computer/protocols/impl/SPI.c
 
             # sensors
-            ../flight-computer/board/components/impl/imu_sensor.c
+            ../flight-computer/board/components/impl/icm20948_imu_sensor.c
             ../flight-computer/board/components/impl/pressure_sensor.c
             ../flight-computer/board/components/impl/buzzer.c
             ../flight-computer/board/components/flash.c
@@ -200,9 +199,11 @@ SET(USER_SRC                # Board
         # CLI
         ../flight-computer/command-line-interface/controller.c
         ../flight-computer/command-line-interface/tools/read.c
+        ../flight-computer/command-line-interface/tools/save.c
         ../flight-computer/command-line-interface/tools/configure.c
         ../flight-computer/command-line-interface/tools/mem.c
         ../flight-computer/command-line-interface/tools/sysctl.c
+        ../flight-computer/command-line-interface/tools/e-match.c
 
         ../flight-computer/core/system_configuration.c)
 
@@ -236,7 +237,7 @@ IF(NOT BUILD_FOR_SIM_ON_WIN_OS)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_SOURCE_DIR}/cmake-build-debug/${PROJECT_NAME}.map")
 
     ADD_CUSTOM_TARGET(upload
-            ${GDB} -iex "target remote tcp:localhost:3333"
+            ${GDB} -iex "target extended-remote tcp:localhost:3333"
             -iex "monitor program $<TARGET_FILE:${PROJECT_NAME}.${EXECUTABLE_EXTENSION}>"
             -iex "monitor reset init"
             -iex "disconnect" -iex "quit")

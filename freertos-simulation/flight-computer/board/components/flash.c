@@ -19,7 +19,7 @@ typedef enum flash_command_t
     FLASH_WRITE               = 0x02, // Page Program Command (write)
     FLASH_READ                = 0x03,
     FLASH_ERASE_64KB_SECTOR   = 0xD8,
-    FLASH_ERASE_4KB_SUBSECTOR = 0x20,
+    FLASH_ERASE_4KB_SECTOR    = 0x20,
     FLASH_GET_STATUS_REGISTER = 0x05,
     FLASH_ERASE_ENTIRE_DEVICE = 0x60 // Command to erase the whole device.
 } FlashCommand;
@@ -80,7 +80,7 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
         case FLASH_WRITE_ENABLE:
         {
             uint8_t command_buffer = command;
-            if ( SPI_OK == spi1_transmit ( &command_buffer, NULL, 1, 10 ) )
+            if ( SPI_OK == spi1_single_transmit_only ( &command_buffer, 1, 10 ) )
             {
                 return FLASH_OK;
             }
@@ -91,11 +91,17 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
         }
         case FLASH_READ:
         {
+            if ( FLASH_OK != prvWaitForLastOperationToFinish ( ) )
+            {
+                return FLASH_ERR;
+            }
+
+            uint8_t cmd = command;
             uint8_t command_buffer[] = {
-                    command, ( address & ( FLASH_HIGH_BYTE_MASK_24B ) ) >> 16,
-                    ( address & ( FLASH_MID_BYTE_MASK_24B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_24B )
+                    cmd, ( address & ( FLASH_HIGH_BYTE_MASK_32B ) ) >> 24, ( address & ( FLASH_MIDHIGH_BYTE_MASK_32B ) ) >> 16,
+                    ( address & ( FLASH_MIDLOW_BYTE_MASK_32B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_32B )
             };
-            if ( SPI_OK == spi1_receive ( command_buffer, 4, data_buffer, num_bytes, 200 ) )
+            if ( SPI_OK == spi1_receive ( &command_buffer[0], 5, data_buffer, num_bytes, 200 ) )
             {
                 return FLASH_OK;
             }
@@ -116,11 +122,12 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
                 return FLASH_ERR;
             }
 
+            uint8_t cmd = command;
             uint8_t command_buffer[] = {
-                    command, ( address & ( FLASH_HIGH_BYTE_MASK_24B ) ) >> 16,
-                    ( address & ( FLASH_MID_BYTE_MASK_24B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_24B )
+                    cmd, ( address & ( FLASH_HIGH_BYTE_MASK_32B ) ) >> 24, ( address & ( FLASH_MIDHIGH_BYTE_MASK_32B ) ) >> 16,
+                    ( address & ( FLASH_MIDLOW_BYTE_MASK_32B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_32B )
             };
-            if ( SPI_OK == spi1_send ( command_buffer, 4, data_buffer, num_bytes, 200 ) )
+            if ( SPI_OK == spi1_send ( &command_buffer[0], 5, data_buffer, num_bytes, 200 ) )
             {
                 return FLASH_OK;
             }
@@ -141,11 +148,12 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
                 return FLASH_ERR;
             }
 
+            uint8_t cmd = command;
             uint8_t command_buffer[] = {
-                    command, ( address & ( FLASH_HIGH_BYTE_MASK_24B ) ) >> 16,
-                    ( address & ( FLASH_MID_BYTE_MASK_24B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_24B )
+                    cmd, (address & (FLASH_HIGH_BYTE_MASK_32B)) >> 24, (address & (FLASH_MIDHIGH_BYTE_MASK_32B)) >> 16,
+                    (address & (FLASH_MIDLOW_BYTE_MASK_32B)) >> 8, address & (FLASH_LOW_BYTE_MASK_32B)
             };
-            if ( SPI_OK == spi1_send ( command_buffer, 4, NULL, 0, 10 ) )
+            if ( SPI_OK == spi1_send ( &command_buffer[0], 5, NULL, 0, 10 ) )
             {
                 return FLASH_OK;
             }
@@ -154,7 +162,7 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
                 return FLASH_ERR;
             }
         }
-        case FLASH_ERASE_4KB_SUBSECTOR:
+        case FLASH_ERASE_4KB_SECTOR:
         {
             if ( FLASH_OK != prvExecuteCommand ( 0, FLASH_WRITE_ENABLE, NULL, 0 ) )
             {
@@ -166,11 +174,12 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
                 return FLASH_ERR;
             }
 
+            uint8_t cmd = command;
             uint8_t command_buffer[] = {
-                    command, ( address & ( FLASH_HIGH_BYTE_MASK_24B ) ) >> 16,
-                    ( address & ( FLASH_MID_BYTE_MASK_24B ) ) >> 8, address & ( FLASH_LOW_BYTE_MASK_24B )
+                    cmd, (address & (FLASH_HIGH_BYTE_MASK_32B)) >> 24, (address & (FLASH_MIDHIGH_BYTE_MASK_32B)) >> 16,
+                    (address & (FLASH_MIDLOW_BYTE_MASK_32B)) >> 8, address & (FLASH_LOW_BYTE_MASK_32B)
             };
-            if ( SPI_OK == spi1_send ( command_buffer, 4, NULL, 0, 10 ) )
+            if ( SPI_OK == spi1_send ( &command_buffer[0], 5, NULL, 0, 10 ) )
             {
                 return FLASH_OK;
             }
@@ -192,7 +201,7 @@ static FlashReturnType prvExecuteCommand ( uint32_t address, FlashCommand comman
             }
 
             uint8_t command_buffer = command;
-            if ( SPI_OK == spi1_send ( &command_buffer, 1, NULL, 0, 10 ) )
+            if ( SPI_OK == spi1_single_transmit_only ( &command_buffer, 1, 10 ) )
             {
                 return FLASH_OK;
             }
@@ -225,7 +234,7 @@ FlashStatus flash_erase_4Kb_subsector ( uint32_t address )
         return FLASH_ERR;
     }
 
-    return prvExecuteCommand ( address, FLASH_ERASE_4KB_SUBSECTOR, NULL, 0 );
+    return prvExecuteCommand (address, FLASH_ERASE_4KB_SECTOR, NULL, 0 );
 }
 
 FlashStatus flash_write_range ( uint32_t begin_address, uint8_t * data, uint32_t size )
@@ -307,11 +316,11 @@ FlashStatus flash_check_id ( )
         return FLASH_ERR;
     }
 
-    uint8_t id[3] = { 0, 0, 0 };
+    uint8_t id [ 3 ] = { 0, 0, 0 };
 
     if ( FLASH_OK == prvExecuteCommand ( 0, FLASH_READ_ID, id, 3 ) )
     {
-        if ( id[ 0 ] == FLASH_MANUFACTURER_ID && id[ 1 ] == FLASH_DEVICE_ID_MSB && id[ 2 ] == FLASH_DEVICE_ID_LSB )
+        if ( id [ 0 ] == FLASH_MANUFACTURER_ID /* && id[ 1 ] == FLASH_DEVICE_ID_MSB && id[ 2 ] == FLASH_DEVICE_ID_LSB */ )
         {
             return FLASH_OK;
         }
@@ -416,7 +425,32 @@ size_t flash_scan ( )
     return result;
 }
 
+uint8_t flash_test (uint32_t test_address)
+{
+    uint32_t dummy_data = 4294967291;
+    uint8_t *data = (void *)dummy_data;
+    uint32_t dummy_dataBuff = 0;
+
+    if (test_address > (uint32_t)(FLASH_END_ADDRESS)){
+        DISPLAY_LINE( "[ERROR]: test_address: %lu exceeded flash address stop: %lu (0x7FFFFF)\r\n", test_address, (uint32_t)(FLASH_END_ADDRESS));
+        return false;
+    }
+    else{
+        DISPLAY_LINE( "[STATUS]: writing dummy data: %lu \r\n", dummy_data);
+        if ( FLASH_OK != flash_write(test_address, data, 4) ) {
+            DISPLAY_LINE( "[STATUS]: flash_write() threw an error! \r\n");
+            return false;
+        }
+        if ( FLASH_OK != flash_read(test_address, (void *)(dummy_dataBuff), 4) ) {
+            DISPLAY_LINE( "[STATUS]: flash_read() threw an error! \r\n");
+            return false;
+        }
+        DISPLAY_LINE( "[STATUS]: reading dummy data: %lu \r\n", dummy_dataBuff);
+    }
 
 
 
 
+    return true;
+
+}

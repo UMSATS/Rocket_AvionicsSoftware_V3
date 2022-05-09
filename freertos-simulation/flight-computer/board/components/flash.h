@@ -14,6 +14,8 @@
 #define FLASH_H
 
 #include <stdio.h>
+#include <stdbool.h>
+#include "protocols/UART.h"
 #include <inttypes.h>
 
 /**
@@ -27,14 +29,18 @@
  *  @todo I strongly consider changing all the macros that represent constants
  *  to static const type to ensure type safety! This requires a discussion
  */
-#define FLASH_MANUFACTURER_ID          0x01
+#define FLASH_MANUFACTURER_ID          0xC2
 #define FLASH_DEVICE_ID_MSB            0x02
 #define FLASH_DEVICE_ID_LSB            0x16
 #define FLASH_HIGH_BYTE_MASK_24B       0x00FF0000
 #define FLASH_MID_BYTE_MASK_24B        0x0000FF00
 #define FLASH_LOW_BYTE_MASK_24B        0x000000FF
+#define FLASH_HIGH_BYTE_MASK_32B       0xFF000000
+#define FLASH_MIDHIGH_BYTE_MASK_32B    0x00FF0000
+#define FLASH_MIDLOW_BYTE_MASK_32B     0x0000FF00
+#define FLASH_LOW_BYTE_MASK_32B        0x000000FF
 #define FLASH_PAGE_SIZE                256
-#define FLASH_4KB_SUBSECTOR_SIZE       ( FLASH_PAGE_SIZE * 16  )
+#define FLASH_4KB_SECTOR_SIZE          ( FLASH_PAGE_SIZE * 16  )
 #define FLASH_64KB_SECTOR_SIZE         ( FLASH_PAGE_SIZE * 256 )
 #define FLASH_START_ADDRESS            ( 0x00000000 )
 #define FLASH_END_ADDRESS              ( 0x7FFFFF )
@@ -169,5 +175,16 @@ FlashStatus flash_erase_device ( );
  * @see https://github.com/UMSATS/Avionics-2019/
  */
 size_t flash_scan ( );
+
+/**
+ * @brief
+ * This will write to a specific address some random value then,
+ * read from that address to confirm the value is the same.
+ * @param uint32_t address to be written to
+ * @return uint8_t
+ * The success of test state (0 if fail 1 if pass)
+ * @see https://github.com/UMSATS/Avionics-2019/
+ */
+uint8_t flash_test ( );
 
 #endif // FLASH_H

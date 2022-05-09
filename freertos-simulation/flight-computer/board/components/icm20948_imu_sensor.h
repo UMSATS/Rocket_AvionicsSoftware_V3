@@ -1,10 +1,15 @@
-#ifndef SENSOR_AG_H
-#define SENSOR_AG_H
+//
+// Created by NicCa on 2021-08-06.
+//
+
+#ifndef AVIONICS_ICM20948_IMU_SENSOR_H
+#define AVIONICS_ICM20948_IMU_SENSOR_H
 
 #include <inttypes.h>
 #include <stdbool.h>
 #include "protocols/UART.h"
 
+#define IMU_STR_VAL_LENGTH 6
 
 typedef struct imu_sensor_configuration
 {
@@ -58,7 +63,7 @@ typedef union
 
 
 
-int  imu_sensor_test           ();
+bool imu_sensor_test           ();
 int  imu_sensor_init           ();
 int  imu_sensor_configure      ( IMUSensorConfiguration * parameters );
 int  imu_sensor_start          ( void * const param );
@@ -74,6 +79,4 @@ IMUSensorConfiguration imu_sensor_get_current_configuration();
 void imu_sensor_set_desired_processing_data_rate(uint32_t rate);
 
 
-
-
-#endif // SENSOR_AG_H
+#endif //AVIONICS_ICM20948_IMU_SENSOR_H

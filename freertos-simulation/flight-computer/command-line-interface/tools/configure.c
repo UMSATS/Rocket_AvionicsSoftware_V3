@@ -16,9 +16,9 @@
 #include "memory-management/memory_manager.h"
 
 
-static bool cli_tools_configure_set_data_rate                  (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
-static bool cli_tools_configure_set_initial_time               (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
-static bool cli_tools_configure_set_record_to_flash            (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
+//static bool cli_tools_configure_set_data_rate                  (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
+//static bool cli_tools_configure_set_initial_time               (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
+//static bool cli_tools_configure_set_record_to_flash            (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
 static bool cli_tools_configure_set_accel_bw                   (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
 static bool cli_tools_configure_set_accel_range                (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
 static bool cli_tools_configure_set_accel_odr                  (char* pcWriteBuffer, size_t xWriteBufferLen, const char* str_option_arg);
@@ -40,20 +40,20 @@ bool cli_tools_configure ( char * pcWriteBuffer, size_t xWriteBufferLen, const c
         return true;
     }
 
-    if ( strcmp ( cmd_option, "set_data_rate" ) == 0 )
-    {
-        return cli_tools_configure_set_data_rate ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
-    }
-
-    if ( strcmp ( cmd_option, "set_initial_time" ) == 0 )
-    {
-        return cli_tools_configure_set_initial_time ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
-    }
-
-    if ( strcmp ( cmd_option, "set_record_to_flash" ) == 0 )
-    {
-        return cli_tools_configure_set_record_to_flash ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
-    }
+//    if ( strcmp ( cmd_option, "set_data_rate" ) == 0 )
+//    {
+//        return cli_tools_configure_set_data_rate ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
+//    }
+//
+//    if ( strcmp ( cmd_option, "set_initial_time" ) == 0 )
+//    {
+//        return cli_tools_configure_set_initial_time ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
+//    }
+//
+//    if ( strcmp ( cmd_option, "set_record_to_flash" ) == 0 )
+//    {
+//        return cli_tools_configure_set_record_to_flash ( pcWriteBuffer, xWriteBufferLen, str_option_arg );
+//    }
 
     if ( strcmp ( cmd_option, "set_accel_bw" ) == 0 )
     {
@@ -110,117 +110,136 @@ bool cli_tools_configure ( char * pcWriteBuffer, size_t xWriteBufferLen, const c
 }
 
 
-bool cli_tools_configure_set_data_rate ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
-{
-    const char * cmd_option = "set_data_rate";
-    uint8_t value = atoi ( str_option_arg );
-
-    if ( value > 0 && value <= 100 )
-    {
-        sprintf ( pcWriteBuffer, "Setting data rate to %d Hz\n", value );
-        FlightSystemConfiguration configuration;
-        if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
-        {
-//                transmit_line(uart,output);
-//                config->values.data_rate = 1000/value;
-            return true;
-        }
-        sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
-        return false;
-    }
-
-    sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is in invalid range", cmd_option, str_option_arg );
-    return false;
-}
-
-
-bool cli_tools_configure_set_initial_time ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
-{
-    const char * cmd_option = "set_data_rate";
-    uint32_t value = atoi ( str_option_arg );
-
-    if ( value > 0 && value <= 10000000 )
-    {
-
-        sprintf ( pcWriteBuffer, "Setting initial time to wait to %lu ms\n", value );
-        FlightSystemConfiguration configuration;
-        if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
-        {
-//                transmit_line(uart,output);
-//                config->values.initial_time_to_wait = value;
-            return true;
-        }
-
-        sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
-        return false;
-    }
-
-    sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is in invalid range", cmd_option, str_option_arg );
-    return false;
-}
+//bool cli_tools_configure_set_data_rate ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
+//{
+//    const char * cmd_option = "set_data_rate";
+//    uint8_t value = atoi ( str_option_arg );
+//
+//    if ( value > 0 && value <= 100 )
+//    {
+//        sprintf ( pcWriteBuffer, "Setting data rate to %d Hz\n", value );
+//        FlightSystemConfiguration configuration;
+//        if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+//        {
+//
+////                transmit_line(uart,output);
+////                config->values.data_rate = 1000/value;
+//            return true;
+//        }
+//        sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
+//        return false;
+//    }
+//
+//    sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is in invalid range", cmd_option, str_option_arg );
+//    return false;
+//}
 
 
-bool cli_tools_configure_set_record_to_flash ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
-{
-    const char * cmd_option         = "set_record_to_flash";
-    FlightSystemConfiguration configuration;
-    uint8_t                   value = atoi ( str_option_arg );
-
-    sprintf ( pcWriteBuffer, "Setting initial time to wait to %d ms\n", value );
-
-    switch ( value )
-    {
-        case 0:
-            sprintf ( pcWriteBuffer, "Turning off flash recording\n" );
-            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
-            {
-//                    transmit_line(uart,output);
-//                    config->values.flags &= ~(0x02);
-                return true;
-            }
-
-            sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
-            return false;
-        case 1:
-            sprintf ( pcWriteBuffer, "Turning on flash recording\n" );
-            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
-            {
-//                    transmit_line(uart,output);
-//                    config->values.flags |= (0x02);
-                return true;
-            }
-
-            sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
-            return false;
-        default:
-            sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is invalid.", cmd_option, str_option_arg );
-            return false;
-    }
-}
+//bool cli_tools_configure_set_initial_time ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
+//{
+//    const char * cmd_option = "set_initial_time";
+//    uint32_t value = atoi ( str_option_arg );
+//
+//    if ( value > 0 && value <= 10000000 )
+//    {
+//
+//        sprintf ( pcWriteBuffer, "Setting initial time to wait to %lu ms\n", value );
+//        FlightSystemConfiguration configuration;
+//        if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+//        {
+////                transmit_line(uart,output);
+////                config->values.initial_time_to_wait = value;
+//            return true;
+//        }
+//
+//        sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
+//        return false;
+//    }
+//
+//    sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is in invalid range", cmd_option, str_option_arg );
+//    return false;
+//}
+//
+//
+//bool cli_tools_configure_set_record_to_flash ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
+//{
+//    const char * cmd_option         = "set_record_to_flash";
+//    FlightSystemConfiguration configuration;
+//    uint8_t                   value = atoi ( str_option_arg );
+//
+//    sprintf ( pcWriteBuffer, "Setting initial time to wait to %d ms\n", value );
+//
+//    switch ( value )
+//    {
+//        case 0:
+//            sprintf ( pcWriteBuffer, "Turning off flash recording\n" );
+//            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+//            {
+////                    transmit_line(uart,output);
+////                    config->values.flags &= ~(0x02);
+//                return true;
+//            }
+//
+//            sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
+//            return false;
+//        case 1:
+//            sprintf ( pcWriteBuffer, "Turning on flash recording\n" );
+//            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+//            {
+////                    transmit_line(uart,output);
+////                    config->values.flags |= (0x02);
+//                return true;
+//            }
+//
+//            sprintf ( pcWriteBuffer, "[%s]: Failed to read system configurations! Abort...\n", cmd_option );
+//            return false;
+//        default:
+//            sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is invalid.", cmd_option, str_option_arg );
+//            return false;
+//    }
+//}
 
 bool cli_tools_configure_set_accel_bw ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
 {
     const char * cmd_option = "set_accel_bw";
     uint8_t value = atoi ( str_option_arg );
+    FlightSystemConfiguration configuration;
 
     switch ( value )
     {
 
         case 0:
-            sprintf ( pcWriteBuffer, "Setting accelerometer to no over-sampling\n" );
-//                transmit_line(uart,output);
-//                config->values.ac_bw = BMI08X_ACCEL_BW_NORMAL;
-            return true;
+            sprintf ( pcWriteBuffer, "Setting accelerometer bandwidth to 0\n" );
+            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+            {
+                configuration.imu_sensor_configuration.accel_bandwidth = 0;
+//                    transmit_line(uart,output);
+//                    config->values.flags |= (0x02);
+                return true;
+            }
+            return false;
         case 2:
-            sprintf ( pcWriteBuffer, "Setting accelerometer to 2x over-sampling\n" );
-//                transmit_line(uart,output);
-//                config->values.ac_bw = BMI08X_ACCEL_BW_OSR2;
-            return true;
+            sprintf ( pcWriteBuffer, "Setting accelerometer bandwidth to 2\n" );
+            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+            {
+                configuration.imu_sensor_configuration.accel_bandwidth = 2;
+                memory_manager_set_system_configurations(&configuration);
+//                    transmit_line(uart,output);
+//                    config->values.flags |= (0x02);
+                return true;
+            }
+            return false;
         case 4:
-            sprintf ( pcWriteBuffer, "Setting accelerometer to 4x over-sampling\n" );
-//                transmit_line(uart,output);
-//                config->values.ac_bw = BMI08X_ACCEL_BW_OSR4;
-            return true;
+            sprintf ( pcWriteBuffer, "Setting accelerometer bandwidth to 4\n" );
+            if ( MEM_OK == memory_manager_get_system_configurations ( &configuration ) )
+            {
+                configuration.imu_sensor_configuration.accel_bandwidth = 4;
+                memory_manager_set_system_configurations(&configuration);
+    //                    transmit_line(uart,output);
+    //                    config->values.flags |= (0x02);
+                return true;
+            }
+            return false;
         default:
             sprintf ( pcWriteBuffer, "[%s]: Argument [%s] is invalid.", cmd_option, str_option_arg );
             return false;
@@ -436,6 +455,8 @@ bool cli_tools_configure_set_gyro_range ( char * pcWriteBuffer, size_t xWriteBuf
             return false;
     }
 }
+
+//Pressure config-------------------------------------------------------------------------------------------------------
 
 bool cli_tools_configure_set_press_odr ( char * pcWriteBuffer, size_t xWriteBufferLen, const char * str_option_arg )
 {

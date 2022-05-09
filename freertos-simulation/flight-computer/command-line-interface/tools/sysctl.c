@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <memory.h>
 #include "core/flight_controller.h"
-#include "board/components/imu_sensor.h"
+#include "board/components/icm20948_imu_sensor.h"
 #include "board/components/pressure_sensor.h"
 #include "sim-port/sensor-simulation/datafeeder.h"
 

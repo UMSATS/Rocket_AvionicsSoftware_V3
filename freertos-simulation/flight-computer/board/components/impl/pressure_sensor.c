@@ -145,27 +145,28 @@ int pressure_sensor_configure ( PressureSensorConfiguration * parameters )
 int pressure_sensor_init ( )
 {
     int status = spi2_init ( );
-    if ( status != 0 )
+    if ( status != SPI_OK )
     {
-        return status;
+        return PRESS_SENSOR_ERR;
     }
 
     status = bmp3_init ( &s_device ); // bosch API initialization method
     if ( status != BMP3_OK )
     {
-        return status;
+        return PRESS_SENSOR_ERR;
     }
 
     s_queue = xQueueCreate( 10, sizeof ( PressureSensorData ) );
     if ( s_queue == NULL )
     {
-        return 2;
+        return PRESS_SENSOR_ERR;
     }
 
     vQueueAddToRegistry ( s_queue, "bmp3_queue" );
 
     prvController.isInitialized = true;
-    return status;
+
+    return PRESS_SENSOR_OK;
 }
 
 
@@ -214,28 +215,32 @@ static void prv_pressure_sensor_controller_task ( void * pvParams )
         pressure_sensor_add_measurement ( &dataStruct );
 
         vTaskDelayUntil ( &dataStruct.timestamp, s_desired_processing_data_rate );
+        memset ( &s_data, 0, sizeof ( struct bmp3_data ) );
     }
 
     prvController.isRunning = false;
+
+    DISPLAY_LINE( "[INFO]: Pressure sensor task has been stopped");
+    vTaskDelete( prvController.taskHandle );
 }
 
 int pressure_sensor_start ( void * const pvParameters )
 {
-    DEBUG_LINE( "pressure_sensor_start" );
+    DEBUG_LINE( "[INFO]: Pressure sensor task has been started");
     //Get the parameters.
     if ( !prvController.isInitialized )
     {
-        return IMU_ERR;
+        return PRESS_SENSOR_ERR;
     }
 
     prvController.taskParameters = pvParameters;
 
     if ( pdFALSE == xTaskCreate ( prv_pressure_sensor_controller_task, "ps--manager", configMINIMAL_STACK_SIZE, prvController.taskParameters, 5, &prvController.taskHandle ) )
     {
-        return IMU_ERR;
+        return PRESS_SENSOR_ERR;
     }
 
-    return IMU_OK;
+    return PRESS_SENSOR_OK;
 }
 
 bool pressure_sensor_is_running ( )
@@ -250,14 +255,7 @@ void pressure_sensor_stop ( )
 
 static void delay_ms ( uint32_t period_ms )
 {
-    if ( taskSCHEDULER_NOT_STARTED == xTaskGetSchedulerState ( ) )
-    {
-        board_delay ( period_ms );
-    }
-    else
-    {
-        vTaskDelay ( pdMS_TO_TICKS( period_ms ) );
-    }
+    board_delay ( period_ms );
 }
 
 /*!
@@ -368,25 +366,41 @@ void bmp3_print_result ( const char * api_name, int8_t rslt )
 
 bool pressure_sensor_test ( void )
 {
-    char    result = 0;
-    uint8_t id     = 0x50;
-
-    uint8_t command[] = { 0x80 };
-    uint8_t id_read[] = { 0x00, 0x00 };
-
-    int status = spi2_receive ( command, 1, id_read, 2, 10 );
-
-    if ( status != 0 )
+    int8_t result_flag;
+    result_flag = get_sensor_data ( &s_data );
+    if ( BMP3_E_NULL_PTR == result_flag )
     {
+        DISPLAY_LINE( "[ERROR]: Pressure sensor acquisition failed \r\n");
         return false;
     }
 
-    if ( id_read[ 1 ] == id )
-    {
-        result = 1;
-    }
+    uint32_t pres = (uint32_t)s_data.pressure;
+    int32_t temp = (int32_t)s_data.temperature;
 
-    return result == 1;
+    DEBUG_LINE( "[SUCCESS]: Pressure value: %lu", pres);
+    DEBUG_LINE( "[SUCCESS]: Temperature value: %ld", temp);
+
+    return true;
+
+//    char    result = 0;
+//    uint8_t id     = 0x50;
+//
+//    uint8_t command[] = { 0x80 };
+//    uint8_t id_read[] = { 0x00, 0x00 };
+//
+//    int status = spi2_receive ( command, 1, id_read, 2, 10 );
+//
+//    if ( status != 0 )
+//    {
+//        return false;
+//    }
+//
+//    if ( id_read[ 1 ] == id )
+//    {
+//        result = 1;
+//    }
+//
+//    return result == 1;
 }
 
 bool pressure_sensor_read ( PressureSensorData * buffer )
@@ -410,7 +424,7 @@ void pressure_sensor_data_pack ( PressureSensorData bmp_reading, float ground_pr
 
 bool pressure_sensor_add_measurement ( PressureSensorData * _data )
 {
-    return pdTRUE == xQueueSend( s_queue, _data, 0 );
+    return pdTRUE == xQueueSend( s_queue, (void *) _data, 0 );
 }
 
 PressureSensorConfiguration pressure_sensor_get_default_configuration ( )

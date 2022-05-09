@@ -13,5 +13,15 @@
 
 #endif
 
+//Software Unit Tests
+#define pressTemp_SW_UNIT_TEST                              1
+#define imu_SW_UNIT_TEST                                    0
+#define flash_SW_UNIT_TEST                                  0
+
+#if (pressTemp_SW_UNIT_TEST || imu_SW_UNIT_TEST || flash_SW_UNIT_TEST)
+    #define SW_UNIT_TEST_MODE_ON                            1
+#else
+    #define SW_UNIT_TEST_MODE_ON                            0
+#endif
 
 #endif //AVIONICS_USERCONFIG_H

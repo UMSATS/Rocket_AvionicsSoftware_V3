@@ -210,10 +210,8 @@ int spi3_init ( void )
     return SPI_OK;
 }
 
-static SPIStatus transmit ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_t * tx_buffer, uint16_t size, uint32_t timeout )
+static SPIStatus single_transmit_only ( SPI_HandleTypeDef * hspi, uint8_t * addr, uint16_t size, uint32_t timeout )
 {
-    HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
-    HAL_StatusTypeDef    statHAL = HAL_ERROR;
     GPIO_TypeDef         * port  = SPI1_CS_PORT;
     uint16_t             pin     = 0;
 
@@ -240,26 +238,14 @@ static SPIStatus transmit ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_
     // Write the CS low (lock)
     HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
 
-    /* Select the slave register (**1 byte address**) first via a uart_transmit */
-    statHAL = HAL_SPI_Transmit ( hspi, reg_addr, 1, timeout );
+    HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+    HAL_StatusTypeDef    statHAL = HAL_ERROR;
+    statHAL = HAL_SPI_Transmit ( hspi, addr, size, timeout );
     if ( statHAL != HAL_OK )
     {
         while ( statSPI != HAL_SPI_STATE_READY )
         {
             statSPI = HAL_SPI_GetState ( hspi );
-        }
-    }
-    /* Send the tx_buffer to slave */
-
-    if ( size > 1 )
-    {
-        statHAL = HAL_SPI_Transmit ( hspi, tx_buffer, size, timeout );
-        if ( statHAL != HAL_OK )
-        {
-            while ( statSPI != HAL_SPI_STATE_READY )
-            {
-                statSPI = HAL_SPI_GetState ( hspi );
-            }
         }
     }
 
@@ -270,10 +256,71 @@ static SPIStatus transmit ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_
 }
 
 
-static int receive ( SPI_HandleTypeDef * hspi, uint8_t * addr_buffer, uint8_t addr_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
+//static SPIStatus transmit ( SPI_HandleTypeDef * hspi, uint8_t * tx_buffer, uint16_t size, uint32_t timeout )
+//{
+//    GPIO_TypeDef         * port  = SPI1_CS_PORT;
+//    uint16_t             pin     = 0;
+//
+//    if ( hspi->Instance == SPI1 )
+//    {
+//        port = SPI1_CS_PORT;
+//        pin  = SPI1_CS_PIN;
+//    }
+//    else if ( hspi->Instance == SPI2 )
+//    {
+//        port = SPI2_CS_PORT;
+//        pin  = SPI2_CS_PIN;
+//    }
+//    else if ( hspi->Instance == SPI3 )
+//    {
+//        port = SPI3_CS1_PORT;
+//        pin  = SPI3_CS1_PIN;
+//    }
+//    else
+//    {
+//        return SPI_ERR;
+//    }
+//
+//    // Write the CS low (lock)
+//    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
+//
+////    /* Select the slave register (**1 byte address**) first via a uart_transmit */
+////    single_transmit_only (hspi, cmd_buffer, 1, timeout);
+////    HAL_StatusTypeDef    statHAL = HAL_ERROR;
+////    statHAL = HAL_SPI_Transmit ( hspi, cmd_buffer, 1, timeout );
+////    if ( statHAL != HAL_OK )
+////    {
+////        HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+////        while ( statSPI != HAL_SPI_STATE_READY )
+////        {
+////            statSPI = HAL_SPI_GetState ( hspi );
+////        }
+////    }
+//
+//    /* Send the tx_buffer to slave */
+//    HAL_StatusTypeDef statHAL = HAL_ERROR;
+//    if ( size > 1 )
+//    {
+//        statHAL = HAL_SPI_Transmit ( hspi, tx_buffer, size, timeout );
+//        if ( statHAL != HAL_OK )
+//        {
+//            HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+//            while ( statSPI != HAL_SPI_STATE_READY )
+//            {
+//                statSPI = HAL_SPI_GetState ( hspi );
+//            }
+//        }
+//    }
+//
+//    // Write the CS hi (release)
+//    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_SET );
+//
+//    return SPI_OK;
+//}
+
+
+static int receive ( SPI_HandleTypeDef * hspi, uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
 {
-    HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
-    HAL_StatusTypeDef    statHAL = HAL_ERROR;
     GPIO_TypeDef         * port  = SPI1_CS_PORT;
     uint16_t             pin     = 0;
     HAL_StatusTypeDef    stat;
@@ -310,12 +357,14 @@ static int receive ( SPI_HandleTypeDef * hspi, uint8_t * addr_buffer, uint8_t ad
     //Write the CS low
     HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
 
-    //Could also use HAL_TransmittReceive.
+    //Could also use HAL_TransmitReceive.
 
-    //Send the address to read from.
-    if ( addr_buffer_size > 0 )
+    /* Send command and parameters to slave first via a spi_transmit */
+    if ( cmd_buffer_size > 0 )
     {
-        statHAL = HAL_SPI_Transmit ( hspi, addr_buffer, addr_buffer_size, timeout );
+        HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+        HAL_StatusTypeDef    statHAL = HAL_ERROR;
+        statHAL = HAL_SPI_Transmit ( hspi, cmd_buffer, cmd_buffer_size, timeout );
         if ( statHAL != HAL_OK )
         {
             while ( statSPI != HAL_SPI_STATE_READY )
@@ -324,9 +373,12 @@ static int receive ( SPI_HandleTypeDef * hspi, uint8_t * addr_buffer, uint8_t ad
             }
         }
     }
-    //Read in the specified number of bytes.
+
+    // Read in the specified number of bytes.
     if ( rx_buffer_size > 0 )
     {
+        HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+        HAL_StatusTypeDef    statHAL = HAL_ERROR;
         statHAL = HAL_SPI_Receive ( hspi, rx_buffer, rx_buffer_size, timeout );
         if ( statHAL != HAL_OK )
         {
@@ -337,70 +389,72 @@ static int receive ( SPI_HandleTypeDef * hspi, uint8_t * addr_buffer, uint8_t ad
         }
     }
 
-    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_SET );
-    return SPI_OK;
-}
-
-static SPIStatus read ( SPI_HandleTypeDef * hspi, uint8_t * addr_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
-{
-    HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
-    HAL_StatusTypeDef    statHAL = HAL_ERROR;
-
-    GPIO_TypeDef      * port = SPI1_CS_PORT;
-    uint16_t          pin    = 0;
-    HAL_StatusTypeDef stat;
-
-    if ( hspi->Instance == SPI1 )
-    {
-        port = SPI1_CS_PORT;
-        pin  = SPI1_CS_PIN;
-    }
-    else if ( hspi->Instance == SPI2 )
-    {
-        port = SPI2_CS_PORT;
-        pin  = SPI2_CS_PIN;
-    }
-    else if ( hspi->Instance == SPI3 )
-    {
-        port = SPI3_CS1_PORT;
-        pin  = SPI3_CS1_PIN;
-    }
-    else
-    {
-        return SPI_ERR;
-    }
-    //Write the CS low
-    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
-
-    //Could also use HAL_TransmittReceive.
-
-    //Send the address to read from.
-    statHAL = HAL_SPI_Transmit ( hspi, addr_buffer, 1, timeout );
-    if ( statHAL != HAL_OK )
-    {
-        while ( statSPI != HAL_SPI_STATE_READY )
-        {
-            statSPI = HAL_SPI_GetState ( hspi );
-        }
-    }
-
-    //Read in the specified number of bytes.
-    statHAL = HAL_SPI_Receive ( hspi, rx_buffer, total_size - 1, timeout );
-    if ( statHAL != HAL_OK )
-    {
-        while ( statSPI != HAL_SPI_STATE_READY )
-        {
-            statSPI = HAL_SPI_GetState ( hspi );
-        }
-    }
-
+    //Write the CS high
     HAL_GPIO_WritePin ( port, pin, GPIO_PIN_SET );
 
     return SPI_OK;
 }
 
+//static SPIStatus read ( SPI_HandleTypeDef * hspi, uint8_t * cmd_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
+//    HAL_StatusTypeDef    statHAL = HAL_ERROR;
+//
+//    GPIO_TypeDef      * port = SPI1_CS_PORT;
+//    uint16_t          pin    = 0;
+//    HAL_StatusTypeDef stat;
+//
+//    if ( hspi->Instance == SPI1 )
+//    {
+//        port = SPI1_CS_PORT;
+//        pin  = SPI1_CS_PIN;
+//    }
+//    else if ( hspi->Instance == SPI2 )
+//    {
+//        port = SPI2_CS_PORT;
+//        pin  = SPI2_CS_PIN;
+//    }
+//    else if ( hspi->Instance == SPI3 )
+//    {
+//        port = SPI3_CS1_PORT;
+//        pin  = SPI3_CS1_PIN;
+//    }
+//    else
+//    {
+//        return SPI_ERR;
+//    }
+//    //Write the CS low
+//    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
+//
+//    //Could also use HAL_TransmittReceive.
+//
+//    //Send the address to read from.
+//    statHAL = HAL_SPI_Transmit ( hspi, cmd_buffer, 1, timeout );
+//    if ( statHAL != HAL_OK )
+//    {
+//        while ( statSPI != HAL_SPI_STATE_READY )
+//        {
+//            statSPI = HAL_SPI_GetState ( hspi );
+//        }
+//    }
+//
+//    //Read in the specified number of bytes.
+//    statHAL = HAL_SPI_Receive ( hspi, rx_buffer, total_size - 1, timeout );
+//    if ( statHAL != HAL_OK )
+//    {
+//        while ( statSPI != HAL_SPI_STATE_READY )
+//        {
+//            statSPI = HAL_SPI_GetState ( hspi );
+//        }
+//    }
+//
+//    HAL_GPIO_WritePin ( port, pin, GPIO_PIN_SET );
+//
+//    return SPI_OK;
+//}
 
-static int send ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_t reg_addr_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
+
+static int send (SPI_HandleTypeDef * hspi, uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
 {
     HAL_SPI_StateTypeDef statSPI = HAL_SPI_STATE_RESET;
     HAL_StatusTypeDef    statHAL = HAL_ERROR;
@@ -435,13 +489,13 @@ static int send ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_t reg_addr
         return SPI_ERR;
     }
 
-    //Write the CS low (lock)
+    // Write the CS low (lock)
     HAL_GPIO_WritePin ( port, pin, GPIO_PIN_RESET );
 
-    /* Select the slave register (**1 byte address**) first via a uart_transmit */
-    if ( reg_addr_size > 0 )
+    /* Send command and parameters to slave first via a spi_transmit */
+    if ( cmd_buffer_size > 0 )
     {
-        statHAL = HAL_SPI_Transmit ( hspi, reg_addr, reg_addr_size, timeout );
+        statHAL = HAL_SPI_Transmit (hspi, cmd_buffer, cmd_buffer_size, timeout );
         if ( statHAL != HAL_OK )
         {
             while ( statSPI != HAL_SPI_STATE_READY )
@@ -450,6 +504,7 @@ static int send ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_t reg_addr
             }
         }
     }
+
     /* Send the tx_buffer to slave */
     if ( tx_buffer_size > 0 )
     {
@@ -469,66 +524,81 @@ static int send ( SPI_HandleTypeDef * hspi, uint8_t * reg_addr, uint8_t reg_addr
     return SPI_OK;
 }
 
-int spi1_transmit ( uint8_t * addr_buffer, uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+int spi1_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
 {
-    return transmit ( &hspi1, addr_buffer, tx_buffer, total_size, timeout );
+    return single_transmit_only ( &hspi1, tx_buffer, total_size, timeout );
 }
 
-int spi1_read ( uint8_t * addr_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+int spi2_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
 {
-    return read ( &hspi1, addr_buffer, rx_buffer, total_size, timeout );
+    return single_transmit_only ( &hspi2, tx_buffer, total_size, timeout );
 }
 
-int spi1_send ( uint8_t * reg_addr, uint8_t reg_addr_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
+int spi3_single_transmit_only ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
 {
-    return send ( &hspi1, reg_addr, reg_addr_size, tx_buffer, tx_buffer_size, timeout );
+    return single_transmit_only ( &hspi3, tx_buffer, total_size, timeout );
 }
 
-int spi1_receive ( uint8_t * addr_buffer, uint8_t addr_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
+//int spi1_transmit ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return transmit ( &hspi1, tx_buffer, total_size, timeout );
+//}
+
+//int spi1_read ( uint8_t * cmd_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return read ( &hspi1, cmd_buffer, rx_buffer, total_size, timeout );
+//}
+
+int spi1_send (uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
 {
-    return receive ( &hspi1, addr_buffer, addr_buffer_size, rx_buffer, rx_buffer_size, timeout );
+    return send (&hspi1, cmd_buffer, cmd_buffer_size, tx_buffer, tx_buffer_size, timeout );
 }
 
-
-int spi2_transmit ( uint8_t * addr_buffer, uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+int spi1_receive ( uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
 {
-    return transmit ( &hspi2, addr_buffer, tx_buffer, total_size, timeout );
-}
-
-int spi2_read ( uint8_t * addr_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
-{
-    return read ( &hspi2, addr_buffer, rx_buffer, total_size, timeout );
-}
-
-int spi2_send ( uint8_t * reg_addr, uint8_t reg_addr_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
-{
-    return send ( &hspi2, reg_addr, reg_addr_size, tx_buffer, tx_buffer_size, timeout );
-}
-
-int spi2_receive ( uint8_t * addr_buffer, uint8_t addr_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
-{
-    return receive ( &hspi2, addr_buffer, addr_buffer_size, rx_buffer, rx_buffer_size, timeout );
+    return receive ( &hspi1, cmd_buffer, cmd_buffer_size, rx_buffer, rx_buffer_size, timeout );
 }
 
 
-int spi3_transmit ( uint8_t * addr_buffer, uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+//int spi2_transmit ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return transmit ( &hspi2, tx_buffer, total_size, timeout );
+//}
+
+//int spi2_read ( uint8_t * cmd_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return read ( &hspi2, cmd_buffer, rx_buffer, total_size, timeout );
+//}
+
+int spi2_send ( uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
 {
-    return transmit ( &hspi3, addr_buffer, tx_buffer, total_size, timeout );
+    return send ( &hspi2, cmd_buffer, cmd_buffer_size, tx_buffer, tx_buffer_size, timeout );
 }
 
-int spi3_read ( uint8_t * addr_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+int spi2_receive ( uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
 {
-    return read ( &hspi3, addr_buffer, rx_buffer, total_size, timeout );
+    return receive ( &hspi2, cmd_buffer, cmd_buffer_size, rx_buffer, rx_buffer_size, timeout );
 }
 
-int spi3_send ( uint8_t * reg_addr, uint8_t reg_addr_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
+
+//int spi3_transmit ( uint8_t * tx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return transmit ( &hspi3, tx_buffer, total_size, timeout );
+//}
+//
+//int spi3_read ( uint8_t * cmd_buffer, uint8_t * rx_buffer, uint16_t total_size, uint32_t timeout )
+//{
+//    return read ( &hspi3, cmd_buffer, rx_buffer, total_size, timeout );
+//}
+
+int spi3_send ( uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint32_t timeout )
 {
-    return send ( &hspi3, reg_addr, reg_addr_size, tx_buffer, tx_buffer_size, timeout );
+    return send ( &hspi3, cmd_buffer, cmd_buffer_size, tx_buffer, tx_buffer_size, timeout );
 }
 
-int spi3_receive ( uint8_t * addr_buffer, uint8_t addr_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
+int spi3_receive ( uint8_t * cmd_buffer, uint8_t cmd_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size, uint32_t timeout )
 {
-    return receive ( &hspi3, addr_buffer, addr_buffer_size, rx_buffer, rx_buffer_size, timeout );
+    return receive ( &hspi3, cmd_buffer, cmd_buffer_size, rx_buffer, rx_buffer_size, timeout );
 }
 
 
